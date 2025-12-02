@@ -1,4 +1,4 @@
-import { createShapeId, Editor } from '@tldraw/tldraw'
+import { createShapeId, Editor, AssetRecordType } from '@tldraw/tldraw'
 import { autoLayout, LayoutNode, LayoutEdge } from './autoLayout'
 import { DiagramData } from './functionDefinitions'
 import { getNodeConfig } from './nodeTypeMapping'
@@ -55,8 +55,22 @@ export function generateDiagram(
 
         // Obtenir la configuration visuelle pour ce type de node
         const config = getNodeConfig(node.type)
+        let iconUrl = config.iconUrl
 
-        // Créer la shape rectangle avec la couleur appropriée
+        // DÉTECTION INTELLIGENTE DE LOGO (Mini-hack pour l'effet Wow)
+        const labelLower = node.label.toLowerCase()
+        if (labelLower.includes('aws')) iconUrl = 'https://cdn.simpleicons.org/amazonaws/232F3E'
+        if (labelLower.includes('react')) iconUrl = 'https://cdn.simpleicons.org/react/61DAFB'
+        if (labelLower.includes('next')) iconUrl = 'https://cdn.simpleicons.org/nextdotjs/000000'
+        if (labelLower.includes('node')) iconUrl = 'https://cdn.simpleicons.org/nodedotjs/339933'
+        if (labelLower.includes('docker')) iconUrl = 'https://cdn.simpleicons.org/docker/2496ED'
+        if (labelLower.includes('postgres')) iconUrl = 'https://cdn.simpleicons.org/postgresql/336791'
+        if (labelLower.includes('mongo')) iconUrl = 'https://cdn.simpleicons.org/mongodb/47A248'
+        if (labelLower.includes('firebase')) iconUrl = 'https://cdn.simpleicons.org/firebase/FFCA28'
+        if (labelLower.includes('vercel')) iconUrl = 'https://cdn.simpleicons.org/vercel/000000'
+        if (labelLower.includes('supabase')) iconUrl = 'https://cdn.simpleicons.org/supabase/3ECF8E'
+
+        // 1. Créer la shape container (geo)
         editor.createShape({
             id: shapeId,
             type: 'geo',
@@ -67,27 +81,75 @@ export function generateDiagram(
                 w: DEFAULT_NODE_WIDTH,
                 h: DEFAULT_NODE_HEIGHT,
                 color: config.color,
-                fill: 'solid',
+                fill: 'semi', // 'semi' est plus joli que 'solid'
+                text: node.label, // Tldraw gère le texte centré nativement dans 'geo'
+                font: 'sans',
+                size: 's',
             },
         })
+
+        const shapesToGroup = [shapeId]
+
+        // 2. Créer l'icône si une URL est fournie
+        if (iconUrl) {
+            const assetId = AssetRecordType.createId()
+            const iconId = createShapeId()
+            const iconSize = 32
+
+            // Créer l'asset pour l'image
+            editor.createAssets([{
+                id: assetId,
+                type: 'image',
+                typeName: 'asset',
+                props: {
+                    name: 'icon',
+                    src: iconUrl,
+                    w: iconSize,
+                    h: iconSize,
+                    mimeType: 'image/svg+xml',
+                    isAnimated: false
+                },
+                meta: {}
+            }])
+
+            // Positionner l'icône (Un peu décalé comme demandé)
+            const iconX = position.x + 10
+            const iconY = position.y + 10
+
+            editor.createShape({
+                id: iconId,
+                type: 'image',
+                x: iconX,
+                y: iconY,
+                props: {
+                    assetId: assetId,
+                    w: iconSize,
+                    h: iconSize,
+                },
+            })
+            shapesToGroup.push(iconId)
+        }
+
+        // Grouper les éléments (C'est mieux pour l'UX même si "gardons simple")
+        if (shapesToGroup.length > 1) {
+            editor.groupShapes(shapesToGroup)
+        }
     })
 
     // Créer les flèches entre les nœuds
     data.edges.forEach((edge) => {
         const fromNode = layout.nodes.get(edge.source)
         const toNode = layout.nodes.get(edge.target)
-        const fromNodeDef = layoutNodes.find((n) => n.id === edge.source)
-        const toNodeDef = layoutNodes.find((n) => n.id === edge.target)
 
-        if (!fromNode || !toNode || !fromNodeDef || !toNodeDef) return
+        if (!fromNode || !toNode) return
 
         const arrowId = createShapeId()
 
         // Calculer les coordonnées du centre des nœuds
-        const fromCenterX = fromNode.x + fromNodeDef.width / 2
-        const fromCenterY = fromNode.y + fromNodeDef.height / 2
-        const toCenterX = toNode.x + toNodeDef.width / 2
-        const toCenterY = toNode.y + toNodeDef.height / 2
+        const fromCenterX = fromNode.x + DEFAULT_NODE_WIDTH / 2
+        const fromCenterY = fromNode.y + DEFAULT_NODE_HEIGHT / 2
+        const toCenterX = toNode.x + DEFAULT_NODE_WIDTH / 2
+        const toCenterY = toNode.y + DEFAULT_NODE_HEIGHT / 2
 
         // Créer une flèche
         editor.createShape({
@@ -96,16 +158,14 @@ export function generateDiagram(
             x: fromCenterX,
             y: fromCenterY,
             props: {
-                start: {
-                    x: 0,
-                    y: 0,
-                },
+                start: { x: 0, y: 0 },
                 end: {
                     x: toCenterX - fromCenterX,
                     y: toCenterY - fromCenterY,
                 },
                 color: 'black',
                 arrowheadEnd: 'arrow',
+                text: edge.label || '',
             },
         })
     })

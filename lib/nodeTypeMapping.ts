@@ -1,49 +1,43 @@
 import { NodeType } from './functionDefinitions'
 
-/**
- * Configuration visuelle pour chaque type de node
- */
 export interface NodeTypeConfig {
     color: string
-    geo: 'rectangle' | 'diamond' | 'ellipse'
-    emoji: string
+    geo: 'rectangle' | 'diamond' | 'ellipse' | 'cloud'
+    iconUrl?: string // Nouveau champ optionnel
+    labelColor?: string
 }
 
-/**
- * Mapping des types de nodes vers leurs propriétés visuelles
- * Utilisé pour convertir les types AI en propriétés tldraw
- */
 export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
     user: {
         color: 'green',
-        geo: 'rectangle',
-        emoji: '👤'
+        geo: 'ellipse',
+        iconUrl: 'https://cdn.simpleicons.org/users', // Exemple
+        labelColor: 'black'
     },
     server: {
-        color: 'blue',
+        color: 'grey', // Plus neutre pour les serveurs
         geo: 'rectangle',
-        emoji: '🖥️'
+        labelColor: 'black'
+        // Pas d'icône par défaut, on laissera l'IA spécifier le logo plus tard
     },
     database: {
         color: 'red',
-        geo: 'rectangle',
-        emoji: '💾'
+        geo: 'rectangle', // Tldraw n'a pas de forme "cylindre" native simple, rectangle est safe
+        iconUrl: 'https://cdn.simpleicons.org/postgresql/black',
+        labelColor: 'black'
     },
     decision: {
         color: 'yellow',
         geo: 'diamond',
-        emoji: '❓'
+        labelColor: 'black'
     },
     step: {
-        color: 'grey',
+        color: 'blue',
         geo: 'rectangle',
-        emoji: '📝'
+        labelColor: 'white'
     }
 }
 
-/**
- * Obtient la configuration visuelle pour un type de node donné
- */
 export function getNodeConfig(type: NodeType): NodeTypeConfig {
     return NODE_TYPE_CONFIG[type] || NODE_TYPE_CONFIG.step
 }
