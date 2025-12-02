@@ -19,6 +19,7 @@ export const MOCK_AWS_ARCHITECTURE: DiagramData = {
         { source: 'ec2-1', target: 'rds', label: 'SQL' },
         { source: 'ec2-2', target: 'rds', label: 'SQL' },
     ],
+    explanation: 'This diagram shows a standard AWS architecture with a Load Balancer distributing traffic to two EC2 instances, which then connect to an RDS database.'
 }
 
 export const MOCK_LOGIN_FLOW: DiagramData = {
@@ -37,6 +38,7 @@ export const MOCK_LOGIN_FLOW: DiagramData = {
         { source: 'check', target: 'success', label: 'Yes' },
         { source: 'check', target: 'error', label: 'No' },
     ],
+    explanation: 'This flow chart illustrates the user login process, including credential validation and error handling.'
 }
 
 export const MOCK_API_ARCHITECTURE: DiagramData = {
@@ -53,6 +55,7 @@ export const MOCK_API_ARCHITECTURE: DiagramData = {
         { source: 'api', target: 'db' },
         { source: 'api', target: 'cache' },
     ],
+    explanation: 'A typical API architecture with a client app connecting to a REST API, which uses an Auth Service for security and interacts with PostgreSQL and Redis.'
 }
 
 export const MOCK_CICD_PIPELINE: DiagramData = {
@@ -71,12 +74,13 @@ export const MOCK_CICD_PIPELINE: DiagramData = {
         { source: 'quality', target: 'deploy', label: 'Pass' },
         { source: 'quality', target: 'rollback', label: 'Fail' },
     ],
+    explanation: 'A CI/CD pipeline showing the stages from Git Commit to Deployment or Rollback based on quality checks.'
 }
 
 /**
  * Liste de tous les diagrammes mockés disponibles
  */
-export const MOCK_DIAGRAMS = {
+export const MOCK_DIAGRAMS: Record<string, DiagramData> = {
     'AWS Architecture': MOCK_AWS_ARCHITECTURE,
     'Login Flow': MOCK_LOGIN_FLOW,
     'API Architecture': MOCK_API_ARCHITECTURE,
@@ -99,5 +103,6 @@ export const MOCK_DIAGRAMS = {
             { source: 'payment', target: 'success', label: 'Approved' },
             { source: 'success', target: 'inventory' },
         ],
+        explanation: 'The steps a customer takes to purchase a product, from browsing to payment and inventory update.'
     },
 }

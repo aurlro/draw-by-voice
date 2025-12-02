@@ -21,7 +21,13 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
             console.log('🎯 Function called:', functionName, args)
 
             if (functionName === 'generate_diagram' && args.diagram_data) {
-                const diagramData = args.diagram_data as DiagramData
+                const rawDiagramData = args.diagram_data as Omit<DiagramData, 'explanation'>
+                const explanation = args.explanation as string
+
+                const diagramData: DiagramData = {
+                    ...rawDiagramData,
+                    explanation: explanation || ''
+                }
 
                 // Générer le diagramme sur le canvas
                 generateDiagram(editor, diagramData, 'LR')

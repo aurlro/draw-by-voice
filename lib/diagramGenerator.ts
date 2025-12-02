@@ -173,9 +173,36 @@ export function generateDiagram(
     // Zoomer pour afficher tout le diagramme
     editor.zoomToFit()
 
+    // Ajouter l'explication si elle existe
+    if (data.explanation) {
+        // 1. Calculer la largeur totale du diagramme généré pour placer le texte à côté
+        const layoutWidth = layout.width
+        const textX = layoutWidth + 100 // 100px de marge à droite
+
+        const explanationId = createShapeId()
+        editor.createShape({
+            id: explanationId,
+            type: 'text',
+            x: textX,
+            y: 0, // En haut
+            props: {
+                text: data.explanation,
+                scale: 1,
+                font: 'mono', // Style "Code"
+                align: 'start',
+                w: 400, // Largeur fixe pour le bloc de texte
+                autoSize: false, // Important pour que le wrapping fonctionne avec w fixe
+            },
+        })
+    }
+
+    // Zoomer à nouveau pour inclure le texte
+    editor.zoomToFit()
+
     console.log('✅ Diagram generated:', {
         nodes: data.nodes.length,
         edges: data.edges.length,
+        hasExplanation: !!data.explanation,
         direction,
     })
 }

@@ -21,6 +21,7 @@ export interface DiagramEdge {
 export interface DiagramData {
     nodes: DiagramNode[]
     edges: DiagramEdge[]
+    explanation: string
 }
 
 /**
@@ -84,8 +85,12 @@ export const GENERATE_DIAGRAM_FUNCTION = {
                     }
                 },
                 required: ['nodes', 'edges']
+            },
+            explanation: {
+                type: 'string',
+                description: 'A markdown summary of the architecture flow and key decisions.'
             }
         },
-        required: ['diagram_data']
+        required: ['diagram_data', 'explanation']
     }
 }
