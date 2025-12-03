@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎨 Draw by Voice
 
-## Getting Started
+**Draw by Voice** est une application web innovante qui permet de générer des diagrammes d'architecture logicielle simplement en les décrivant à voix haute.
 
-First, run the development server:
+## ✨ Fonctionnalités
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Contrôle Vocal en Temps Réel** : Discutez avec l'IA pour créer et modifier vos diagrammes.
+- **Génération Automatique** : Transforme vos descriptions en schémas clairs et organisés (Nodes & Edges).
+- **Explications Intelligentes** : L'IA fournit un résumé textuel de l'architecture générée directement sur le canvas.
+- **Canvas Infini** : Basé sur [tldraw](https://tldraw.com), profitez d'un espace de travail fluide et puissant.
+- **Mode Démo** : Testez les capacités de l'outil avec des exemples pré-configurés (AWS, Login Flow, CI/CD...).
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Commencer
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Pour installer et lancer le projet sur votre machine, consultez notre guide détaillé :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+👉 **[Guide d'installation et de lancement local](./LOCAL_SETUP.md)**
 
-## Learn More
+## 🛠 Technologies
 
-To learn more about Next.js, take a look at the following resources:
+- **Frontend** : Next.js 15, React 19, Tailwind CSS
+- **Canvas** : tldraw SDK
+- **IA** : OpenAI Realtime API (WebSockets)
+- **Layout** : Dagre (pour l'agencement automatique)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 Licence
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Ce projet est sous licence MIT.

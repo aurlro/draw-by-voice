@@ -41,6 +41,13 @@ export default function TldrawCanvas({ onMount }: TldrawCanvasProps) {
         onMount={handleMount}
         components={components}
         hideUi={true}
+        overrides={{
+          translations: {
+            fr: {
+              'fill-style.lined-fill': 'Remplissage ligné'
+            }
+          }
+        }}
       />
     </div>
   )

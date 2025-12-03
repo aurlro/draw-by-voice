@@ -29,6 +29,7 @@ export interface DiagramData {
  * Définit la structure de la fonction generate_diagram
  */
 export const GENERATE_DIAGRAM_FUNCTION = {
+    type: 'function',
     name: 'generate_diagram',
     description: 'Generate an architectural diagram with nodes and edges based on user description',
     parameters: {
@@ -94,3 +95,4 @@ export const GENERATE_DIAGRAM_FUNCTION = {
         required: ['diagram_data', 'explanation']
     }
 }
+

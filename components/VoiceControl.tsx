@@ -18,9 +18,11 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
      */
     const handleFunctionCall = useCallback(
         (functionName: string, args: Record<string, unknown>) => {
-            console.log('🎯 Function called:', functionName, args)
+            console.log('🎯🎯🎯 VoiceControl: Function called:', functionName)
+            console.log('📦 VoiceControl: Arguments:', args)
 
             if (functionName === 'generate_diagram' && args.diagram_data) {
+                console.log('✅ VoiceControl: Generating diagram...')
                 const rawDiagramData = args.diagram_data as Omit<DiagramData, 'explanation'>
                 const explanation = args.explanation as string
 
@@ -29,11 +31,16 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
                     explanation: explanation || ''
                 }
 
+                console.log('📊 VoiceControl: Diagram data:', diagramData)
+
                 // Générer le diagramme sur le canvas
                 generateDiagram(editor, diagramData, 'LR')
+                console.log('✅ VoiceControl: Diagram generated!')
 
                 // Callback optionnel
                 onDiagramGenerated?.(diagramData)
+            } else {
+                console.warn('⚠️ VoiceControl: Function not handled or missing diagram_data', functionName, args)
             }
         },
         [editor, onDiagramGenerated]
@@ -58,17 +65,19 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
      * Toggle de l'enregistrement
      */
     const toggleRecording = useCallback(async () => {
-        if (!state.isConnected) {
-            // Connecter d'abord
-            await connect()
-            // Attendre un peu que la connexion s'établisse
-            setTimeout(() => {
-                startRecording()
-            }, 500)
-        } else if (state.isRecording) {
-            stopRecording()
-        } else {
-            startRecording()
+        try {
+            if (!state.isConnected) {
+                // Connecter d'abord
+                await connect()
+                // Une fois connecté, démarrer l'enregistrement
+                await startRecording()
+            } else if (state.isRecording) {
+                stopRecording()
+            } else {
+                await startRecording()
+            }
+        } catch (error) {
+            console.error('Failed to toggle recording:', error)
         }
     }, [state.isConnected, state.isRecording, connect, startRecording, stopRecording])
 
