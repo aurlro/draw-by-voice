@@ -1,4 +1,4 @@
-import { NodeType } from './functionDefinitions'
+import type { NodeType } from '@/types'
 
 export interface NodeTypeConfig {
     color: string

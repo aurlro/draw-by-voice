@@ -7,11 +7,12 @@
  */
 export async function GET() {
     try {
-        const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
+        const apiKey = process.env.OPENAI_API_KEY
 
         if (!apiKey) {
+            console.error('❌ OPENAI_API_KEY is not configured in environment variables')
             return Response.json(
-                { error: 'OpenAI API key not configured' },
+                { error: 'Server configuration error' },
                 { status: 500 }
             )
         }
@@ -31,9 +32,17 @@ export async function GET() {
 
         if (!response.ok) {
             const error = await response.text()
-            console.error('Failed to create ephemeral session:', error)
+            console.error('❌ Failed to create ephemeral session:', {
+                status: response.status,
+                statusText: response.statusText,
+                error: error
+            })
             return Response.json(
-                { error: 'Failed to create session' },
+                {
+                    error: 'Failed to create session',
+                    details: response.statusText,
+                    status: response.status
+                },
                 { status: response.status }
             )
         }
@@ -45,7 +54,7 @@ export async function GET() {
             expires_at: data.expires_at,
         })
     } catch (error) {
-        console.error('Error creating session:', error)
+        console.error('❌ Error creating session:', error)
         return Response.json(
             { error: 'Internal server error' },
             { status: 500 }

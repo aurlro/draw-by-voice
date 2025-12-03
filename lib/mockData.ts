@@ -1,4 +1,4 @@
-import { DiagramData } from './functionDefinitions'
+import type { DiagramData } from '@/types'
 
 /**
  * Données mockées pour tester le système sans API réelle

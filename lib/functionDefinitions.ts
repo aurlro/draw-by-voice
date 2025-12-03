@@ -1,32 +1,10 @@
-/**
- * Type definitions pour les nodes du diagramme
- */
-export type NodeType = 'user' | 'server' | 'database' | 'decision' | 'step'
-
-/**
- * Interface pour les données du diagramme reçues de l'IA
- */
-export interface DiagramNode {
-    id: string
-    label: string
-    type: NodeType
-}
-
-export interface DiagramEdge {
-    source: string
-    target: string
-    label?: string
-}
-
-export interface DiagramData {
-    nodes: DiagramNode[]
-    edges: DiagramEdge[]
-    explanation: string
-}
+import type { NodeType } from '@/types'
 
 /**
  * Function definition pour OpenAI Realtime API
  * Définit la structure de la fonction generate_diagram
+ * 
+ * NOTE: Cette définition doit être synchronisée avec DiagramDataSchema dans lib/schemas.ts
  */
 export const GENERATE_DIAGRAM_FUNCTION = {
     type: 'function',
@@ -55,7 +33,7 @@ export const GENERATE_DIAGRAM_FUNCTION = {
                                 },
                                 type: {
                                     type: 'string',
-                                    enum: ['user', 'server', 'database', 'decision', 'step'],
+                                    enum: ['user', 'server', 'database', 'decision', 'step'] as const satisfies readonly NodeType[],
                                     description: 'Type of node: user (actors), server (services), database (storage), decision (if/else), step (process)'
                                 }
                             },
@@ -83,16 +61,15 @@ export const GENERATE_DIAGRAM_FUNCTION = {
                             },
                             required: ['source', 'target']
                         }
+                    },
+                    explanation: {
+                        type: 'string',
+                        description: 'A markdown summary of the architecture flow and key decisions.'
                     }
                 },
-                required: ['nodes', 'edges']
-            },
-            explanation: {
-                type: 'string',
-                description: 'A markdown summary of the architecture flow and key decisions.'
+                required: ['nodes', 'edges', 'explanation']
             }
         },
-        required: ['diagram_data', 'explanation']
+        required: ['diagram_data']
     }
-}
-
+} as const

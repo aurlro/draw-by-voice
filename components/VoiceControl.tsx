@@ -1,11 +1,9 @@
 'use client'
 
 import { Editor } from '@tldraw/tldraw'
-
-import { useCallback, useEffect } from 'react'
-import { useOpenAIRealtime } from '@/hooks/useOpenAIRealtime'
-import { generateDiagram } from '@/lib/diagramGenerator'
-import { DiagramData } from '@/lib/functionDefinitions'
+import { useCallback } from 'react'
+import { useDiagramAgent } from '@/hooks/useDiagramAgent'
+import type { DiagramData } from '@/types'
 
 interface VoiceControlProps {
     editor: Editor
@@ -14,93 +12,43 @@ interface VoiceControlProps {
 
 export default function VoiceControl({ editor, onDiagramGenerated }: VoiceControlProps) {
     /**
-     * Handler pour les appels de fonction de l'IA
+     * Hook d'agent de diagramme (orchestration complète)
      */
-    const handleFunctionCall = useCallback(
-        (functionName: string, args: Record<string, unknown>) => {
-            console.log('🎯🎯🎯 VoiceControl: Function called:', functionName)
-            console.log('📦 VoiceControl: Arguments:', args)
-
-            if (functionName === 'generate_diagram' && args.diagram_data) {
-                console.log('✅ VoiceControl: Generating diagram...')
-                const rawDiagramData = args.diagram_data as Omit<DiagramData, 'explanation'>
-                const explanation = args.explanation as string
-
-                const diagramData: DiagramData = {
-                    ...rawDiagramData,
-                    explanation: explanation || ''
-                }
-
-                console.log('📊 VoiceControl: Diagram data:', diagramData)
-
-                // Générer le diagramme sur le canvas
-                generateDiagram(editor, diagramData, 'LR')
-                console.log('✅ VoiceControl: Diagram generated!')
-
-                // Callback optionnel
-                onDiagramGenerated?.(diagramData)
-            } else {
-                console.warn('⚠️ VoiceControl: Function not handled or missing diagram_data', functionName, args)
-            }
-        },
-        [editor, onDiagramGenerated]
-    )
-
-    /**
-     * Handler pour les erreurs
-     */
-    const handleError = useCallback((error: string) => {
-        console.error('❌ Voice control error:', error)
-    }, [])
-
-    /**
-     * Hook OpenAI Realtime
-     */
-    const { state, connect, disconnect, startRecording, stopRecording } = useOpenAIRealtime({
-        onFunctionCall: handleFunctionCall,
-        onError: handleError,
+    const { isActive, isListening, isConnecting, error, startVoiceSession, stopVoiceSession, disconnect } = useDiagramAgent({
+        editor,
+        onDiagramGenerated,
+        onError: useCallback((err: string) => {
+            console.error('❌ Voice control error:', err)
+        }, []),
     })
 
     /**
-     * Toggle de l'enregistrement
+     * Toggle de la session vocale
      */
-    const toggleRecording = useCallback(async () => {
+    const toggleVoiceSession = useCallback(async () => {
         try {
-            if (!state.isConnected) {
-                // Connecter d'abord
-                await connect()
-                // Une fois connecté, démarrer l'enregistrement
-                await startRecording()
-            } else if (state.isRecording) {
-                stopRecording()
+            if (isListening) {
+                stopVoiceSession()
             } else {
-                await startRecording()
+                await startVoiceSession()
             }
         } catch (error) {
-            console.error('Failed to toggle recording:', error)
+            console.error('Failed to toggle voice session:', error)
         }
-    }, [state.isConnected, state.isRecording, connect, startRecording, stopRecording])
-
-    /**
-     * Cleanup à la destruction
-     */
-    useEffect(() => {
-        return () => {
-            if (state.isConnected) {
-                disconnect()
-            }
-        }
-    }, [state.isConnected, disconnect])
+    }, [isListening, startVoiceSession, stopVoiceSession])
 
     /**
      * Classe CSS pour l'animation du bouton
      */
     const getButtonClass = () => {
-        if (state.isRecording) {
+        if (isListening) {
             return 'bg-red-600 hover:bg-red-700 animate-pulse'
         }
-        if (state.isConnected) {
+        if (isActive) {
             return 'bg-blue-600 hover:bg-blue-700'
+        }
+        if (isConnecting) {
+            return 'bg-yellow-600 hover:bg-yellow-700'
         }
         return 'bg-gray-600 hover:bg-gray-700'
     }
@@ -109,10 +57,10 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
      * Icône du bouton
      */
     const getButtonIcon = () => {
-        if (state.isRecording) {
+        if (isListening) {
             return '🔴'
         }
-        if (state.isConnected) {
+        if (isActive || isConnecting) {
             return '🎤'
         }
         return '🎤'
@@ -122,10 +70,13 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
      * Texte du bouton
      */
     const getButtonText = () => {
-        if (state.isRecording) {
+        if (isListening) {
             return 'Arrêter'
         }
-        if (state.isConnected) {
+        if (isConnecting) {
+            return 'Connexion...'
+        }
+        if (isActive) {
             return 'Parler'
         }
         return 'Micro'
@@ -134,15 +85,15 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
     return (
         <div className="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-2">
             {/* Message d'erreur */}
-            {state.error && (
+            {error && (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg max-w-sm shadow-lg">
                     <p className="text-sm font-semibold">Erreur</p>
-                    <p className="text-xs">{state.error}</p>
+                    <p className="text-xs">{error}</p>
                 </div>
             )}
 
             {/* Indicateur d'état */}
-            {state.isConnected && !state.isRecording && (
+            {isActive && !isListening && !isConnecting && (
                 <div className="bg-blue-100 border border-blue-400 text-blue-700 px-3 py-2 rounded-lg text-xs shadow-md">
                     Connecté - Prêt à écouter
                 </div>
@@ -150,16 +101,17 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
 
             {/* Bouton micro principal */}
             <button
-                onClick={toggleRecording}
-                className={`${getButtonClass()} text-white font-semibold px-6 py-4 rounded-full shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center gap-2`}
-                title={state.isRecording ? 'Arrêter l\'enregistrement' : 'Démarrer le contrôle vocal'}
+                onClick={toggleVoiceSession}
+                disabled={isConnecting}
+                className={`${getButtonClass()} text-white font-semibold px-6 py-4 rounded-full shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+                title={isListening ? 'Arrêter l\'enregistrement' : 'Démarrer le contrôle vocal'}
             >
                 <span className="text-2xl">{getButtonIcon()}</span>
                 <span>{getButtonText()}</span>
             </button>
 
             {/* Bouton déconnexion (si connecté) */}
-            {state.isConnected && !state.isRecording && (
+            {isActive && !isListening && (
                 <button
                     onClick={disconnect}
                     className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1 rounded-full shadow-md transition-all duration-200"

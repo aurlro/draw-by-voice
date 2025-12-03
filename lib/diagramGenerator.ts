@@ -1,6 +1,6 @@
 import { createShapeId, Editor } from '@tldraw/tldraw'
 import { autoLayout, LayoutNode, LayoutEdge } from './autoLayout'
-import { DiagramData } from './functionDefinitions'
+import type { DiagramData } from '@/types'
 import { getNodeConfig } from './nodeTypeMapping'
 
 const DEFAULT_NODE_WIDTH = 160
