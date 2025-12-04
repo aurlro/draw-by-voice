@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { Editor } from '@tldraw/tldraw'
-import { generateDiagram } from '@/lib/diagramGenerator'
-import { MOCK_DIAGRAMS } from '@/lib/mockData'
+import { generateDiagram } from '../lib/diagramGenerator'
+import { MOCK_DIAGRAMS } from '../lib/mockData'
 
 interface DemoButtonProps {
     editor: Editor

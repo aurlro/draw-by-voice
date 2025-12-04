@@ -3,7 +3,7 @@
  * Centralisés pour éviter la duplication et garantir la cohérence
  */
 
-import type { DiagramData, DiagramNode, DiagramEdge, NodeType } from '@/lib/schemas'
+import type { DiagramData, DiagramNode, DiagramEdge, NodeType } from '../lib/validation/schemas'
 
 /**
  * Re-export des types depuis les schémas Zod

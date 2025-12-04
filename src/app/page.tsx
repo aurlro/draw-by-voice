@@ -1,12 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import TldrawCanvas from '@/components/TldrawCanvas'
+// import { TldrawCanvas, TestButton, AutoLayoutButton, DemoButton } from '@features/diagram'
+import { TldrawCanvas, TestButton, AutoLayoutButton } from '@features/diagram'
+import { VoiceControl } from '@features/voice'
 import { Editor } from '@tldraw/tldraw'
-import TestButton from '@/components/TestButton'
-import AutoLayoutButton from '@/components/AutoLayoutButton'
-import VoiceControl from '@/components/VoiceControl'
-import DemoButton from '@/components/DemoButton'
 
 export default function Home() {
   const [editor, setEditor] = useState<Editor | null>(null)
@@ -23,7 +21,7 @@ export default function Home() {
         <>
           <TestButton editor={editor} />
           <AutoLayoutButton editor={editor} />
-          <DemoButton editor={editor} />
+          {/* <DemoButton editor={editor} /> */}
           <VoiceControl editor={editor} />
         </>
       )}

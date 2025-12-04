@@ -2,14 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Editor } from '@tldraw/tldraw'
-import { useRealtimeConnection } from './useRealtimeConnection'
-import { useAudioRecorder } from './useAudioRecorder'
-import { useAudioPlayer } from './useAudioPlayer'
-import { generateDiagram } from '@/lib/diagramGenerator'
-import { SYSTEM_PROMPT } from '@/lib/systemPrompt'
-import { GENERATE_DIAGRAM_FUNCTION } from '@/lib/functionDefinitions'
-import { DiagramDataSchema } from '@/lib/schemas'
-import type { DiagramData } from '@/types'
+import { useRealtimeConnection } from '@voice/hooks/useRealtimeConnection'
+import { useAudioRecorder } from '@voice/hooks/useAudioRecorder'
+import { useAudioPlayer } from '@voice/hooks/useAudioPlayer'
+import { generateDiagram } from '../lib/diagramGenerator'
+import { SYSTEM_PROMPT } from '@voice/lib/systemPrompt'
+import { GENERATE_DIAGRAM_FUNCTION } from '@voice/lib/functionDefinitions'
+import { DiagramDataSchema } from '@shared/lib/validation/schemas'
+import type { DiagramData } from '@shared/types'
 
 /**
  * Props pour le hook useDiagramAgent

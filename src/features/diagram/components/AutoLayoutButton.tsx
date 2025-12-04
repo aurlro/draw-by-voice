@@ -1,7 +1,7 @@
 'use client'
 
 import { createShapeId, Editor } from '@tldraw/tldraw'
-import { autoLayout, LayoutNode, LayoutEdge } from '@/lib/autoLayout'
+import { autoLayout, LayoutNode, LayoutEdge } from '../lib/autoLayout'
 
 interface AutoLayoutButtonProps {
     editor: Editor

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import type { AudioRecorderRef } from '@/types'
+import type { AudioRecorderRef } from '@shared/types'
 
 /**
  * Props pour le hook useAudioRecorder

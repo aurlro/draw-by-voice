@@ -146,44 +146,68 @@ OPENAI_API_KEY=sk-proj-...
 
 ---
 
-## 📂 Structure du Projet
+##  📂 Structure du Projet
 
 ```
 draw-by-voice/
-├── app/
-│   ├── page.tsx                 # Page principale avec tldraw
-│   ├── layout.tsx               # Layout global
-│   ├── globals.css              # Styles globaux
-│   └── api/
-│       └── realtime/
-│           └── session/
-│               └── route.ts     # API Route (session ephemeral)
-├── components/
-│   ├── VoiceControl.tsx         # Composant bouton micro + UI
-│   ├── DemoDataSelector.tsx     # Sélecteur de données démo
-│   └── ...
-├── hooks/
-│   ├── useDiagramAgent.ts       # 🎯 Orchestration métier
-│   ├── useRealtimeConnection.ts # 🔌 WebSocket
-│   ├── useAudioRecorder.ts      # 🎤 Enregistrement audio
-│   ├── useAudioPlayer.ts        # 🔊 Lecture audio
-│   └── useOpenAIRealtime.deprecated.ts  # (Legacy)
-├── lib/
-│   ├── diagramGenerator.ts      # Génération canvas tldraw
-│   ├── autoLayout.ts            # Algorithme Dagre
-│   ├── schemas.ts               # 🛡️ Schémas Zod
-│   ├── functionDefinitions.ts   # Définition tool OpenAI
-│   ├── systemPrompt.ts          # Prompt système IA
-│   ├── nodeTypeMapping.ts       # Config visuelle nodes
-│   └── mockData.ts              # Données de test
-├── types/
-│   └── index.ts                 # Types TypeScript centralisés
-├── public/                      # Assets statiques
-├── .env.local.example           # Template variables d'env
+├── src/                              # 🆕 Tout le code source
+│   ├── app/                          # Next.js App Router
+│   │   ├── page.tsx                  # Page principale avec tldraw
+│   │   ├── layout.tsx                # Layout global
+│   │   ├── globals.css               # Styles globaux
+│   │   └── api/
+│   │       └── realtime/
+│   │           └── session/
+│   │               └── route.ts      # API Route (session ephemeral)
+│   │
+│   ├── features/                     # 🎯 Organisation par domaine métier
+│   │   ├── diagram/                  # Feature: Génération de diagrammes
+│   │   │   ├── components/           # TldrawCanvas, AutoLayoutButton, DemoButton, TestButton
+│   │   │   ├── hooks/                # useDiagramAgent
+│   │   │   ├── lib/                  # diagramGenerator, autoLayout, nodeTypeMapping, mockData
+│   │   │   └── index.ts              # Exports publics
+│   │   │
+│   │   └── voice/                    # Feature: Contrôle vocal
+│   │       ├── components/           # VoiceControl
+│   │       ├── hooks/                # useRealtimeConnection, useAudioRecorder, useAudioPlayer
+│   │       ├── lib/                  # functionDefinitions, systemPrompt
+│   │       └── index.ts              # Exports publics
+│   │
+│   ├── shared/                       # Code partagé entre features
+│   │   ├── lib/
+│   │   │   └── validation/
+│   │   │       └── schemas.ts        # 🛡️ Schémas Zod
+│   │   ├── types/                    # Types TypeScript centralisés
+│   │   │   └── index.ts
+│   │   └── index.ts                  # Exports publics
+│   │
+│   └── config/                       # Configuration centralisée
+│       ├── env.ts                    # Validation variables d'environnement
+│       └── site.ts                   # Métadonnées du site
+│
+├── docs/                             # 📚 Documentation
+│   ├── architecture/
+│   │   └── ARCHITECTURE.md           # Documentation technique
+│   ├── guides/
+│   │   ├── LOCAL_SETUP.md
+│   │   └── CONTRIBUTING.md
+│   ├── specs/
+│   │   └── SPECIFICATIONS.md
+│   └── media/                        # Ressources média
+│
+├── public/                           # Assets statiques
+├── .env.local.example                # Template variables d'env
 ├── package.json
-├── tsconfig.json                # Config TypeScript (strict mode)
-└── README.md                    # 👈 Vous êtes ici
+├── tsconfig.json                     # Config TypeScript (strict mode + path aliases)
+└── README.md                         # 👈 Vous êtes ici
 ```
+
+**Avantages de cette structure** :
+- ✅ **Feature-Based** : Tout le code d'une feature est colocalisé
+- ✅ **Scalability** : Facile d'ajouter de nouvelles features
+- ✅ **Boundaries** : Dépendances claires entre modules
+- ✅ **Testability** : Chaque feature peut être testée isolément
+
 
 ---
 

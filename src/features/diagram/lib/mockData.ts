@@ -1,4 +1,4 @@
-import type { DiagramData } from '@/types'
+import type { DiagramData } from '@shared/types'
 
 /**
  * Données mockées pour tester le système sans API réelle
@@ -6,11 +6,11 @@ import type { DiagramData } from '@/types'
 
 export const MOCK_AWS_ARCHITECTURE: DiagramData = {
     nodes: [
-        { id: 'user', label: 'User', type: 'user' },
-        { id: 'lb', label: 'Load Balancer', type: 'server' },
-        { id: 'ec2-1', label: 'EC2 Instance 1', type: 'server' },
-        { id: 'ec2-2', label: 'EC2 Instance 2', type: 'server' },
-        { id: 'rds', label: 'RDS Database', type: 'database' },
+        { id: 'user', label: 'User', type: 'user', x: 0, y: 0 },
+        { id: 'lb', label: 'Load Balancer', type: 'server', x: 0, y: 0 },
+        { id: 'ec2-1', label: 'EC2 Instance 1', type: 'server', x: 0, y: 0 },
+        { id: 'ec2-2', label: 'EC2 Instance 2', type: 'server', x: 0, y: 0 },
+        { id: 'rds', label: 'RDS Database', type: 'database', x: 0, y: 0 },
     ],
     edges: [
         { source: 'user', target: 'lb', label: 'HTTPS' },
@@ -24,12 +24,12 @@ export const MOCK_AWS_ARCHITECTURE: DiagramData = {
 
 export const MOCK_LOGIN_FLOW: DiagramData = {
     nodes: [
-        { id: 'user', label: 'User', type: 'user' },
-        { id: 'input', label: 'Enter Credentials', type: 'step' },
-        { id: 'validate', label: 'Validate', type: 'server' },
-        { id: 'check', label: 'Valid?', type: 'decision' },
-        { id: 'success', label: 'Dashboard', type: 'step' },
-        { id: 'error', label: 'Error Message', type: 'step' },
+        { id: 'user', label: 'User', type: 'user', x: 0, y: 0 },
+        { id: 'input', label: 'Enter Credentials', type: 'step', x: 0, y: 0 },
+        { id: 'validate', label: 'Validate', type: 'server', x: 0, y: 0 },
+        { id: 'check', label: 'Valid?', type: 'decision', x: 0, y: 0 },
+        { id: 'success', label: 'Dashboard', type: 'step', x: 0, y: 0 },
+        { id: 'error', label: 'Error Message', type: 'step', x: 0, y: 0 },
     ],
     edges: [
         { source: 'user', target: 'input' },
@@ -43,11 +43,11 @@ export const MOCK_LOGIN_FLOW: DiagramData = {
 
 export const MOCK_API_ARCHITECTURE: DiagramData = {
     nodes: [
-        { id: 'client', label: 'Client App', type: 'user' },
-        { id: 'api', label: 'REST API', type: 'server' },
-        { id: 'auth', label: 'Auth Service', type: 'server' },
-        { id: 'db', label: 'PostgreSQL', type: 'database' },
-        { id: 'cache', label: 'Redis Cache', type: 'database' },
+        { id: 'client', label: 'Client App', type: 'user', x: 0, y: 0 },
+        { id: 'api', label: 'REST API', type: 'server', x: 0, y: 0 },
+        { id: 'auth', label: 'Auth Service', type: 'server', x: 0, y: 0 },
+        { id: 'db', label: 'PostgreSQL', type: 'database', x: 0, y: 0 },
+        { id: 'cache', label: 'Redis Cache', type: 'database', x: 0, y: 0 },
     ],
     edges: [
         { source: 'client', target: 'api', label: 'HTTP' },
@@ -60,12 +60,12 @@ export const MOCK_API_ARCHITECTURE: DiagramData = {
 
 export const MOCK_CICD_PIPELINE: DiagramData = {
     nodes: [
-        { id: 'commit', label: 'Git Commit', type: 'step' },
-        { id: 'build', label: 'Build', type: 'step' },
-        { id: 'test', label: 'Run Tests', type: 'step' },
-        { id: 'quality', label: 'Quality Gate', type: 'decision' },
-        { id: 'deploy', label: 'Deploy', type: 'step' },
-        { id: 'rollback', label: 'Rollback', type: 'step' },
+        { id: 'commit', label: 'Git Commit', type: 'step', x: 0, y: 0 },
+        { id: 'build', label: 'Build', type: 'step', x: 0, y: 0 },
+        { id: 'test', label: 'Run Tests', type: 'step', x: 0, y: 0 },
+        { id: 'quality', label: 'Quality Gate', type: 'decision', x: 0, y: 0 },
+        { id: 'deploy', label: 'Deploy', type: 'step', x: 0, y: 0 },
+        { id: 'rollback', label: 'Rollback', type: 'step', x: 0, y: 0 },
     ],
     edges: [
         { source: 'commit', target: 'build' },
@@ -87,13 +87,13 @@ export const MOCK_DIAGRAMS: Record<string, DiagramData> = {
     'CI/CD Pipeline': MOCK_CICD_PIPELINE,
     'Online Purchase Cycle': {
         nodes: [
-            { id: 'customer', label: 'Customer', type: 'user' },
-            { id: 'browse', label: 'Browse Products', type: 'step' },
-            { id: 'cart', label: 'Add to Cart', type: 'step' },
-            { id: 'checkout', label: 'Checkout', type: 'step' },
-            { id: 'payment', label: 'Payment Gateway', type: 'server' },
-            { id: 'success', label: 'Order Confirmed', type: 'step' },
-            { id: 'inventory', label: 'Update Inventory', type: 'database' },
+            { id: 'customer', label: 'Customer', type: 'user', x: 0, y: 0 },
+            { id: 'browse', label: 'Browse Products', type: 'step', x: 0, y: 0 },
+            { id: 'cart', label: 'Add to Cart', type: 'step', x: 0, y: 0 },
+            { id: 'checkout', label: 'Checkout', type: 'step', x: 0, y: 0 },
+            { id: 'payment', label: 'Payment Gateway', type: 'server', x: 0, y: 0 },
+            { id: 'success', label: 'Order Confirmed', type: 'step', x: 0, y: 0 },
+            { id: 'inventory', label: 'Update Inventory', type: 'database', x: 0, y: 0 },
         ],
         edges: [
             { source: 'customer', target: 'browse' },

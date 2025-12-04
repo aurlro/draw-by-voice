@@ -1,4 +1,4 @@
-import type { NodeType } from '@/types'
+import type { NodeType } from '@shared/types'
 
 /**
  * Function definition pour OpenAI Realtime API
@@ -33,8 +33,27 @@ export const GENERATE_DIAGRAM_FUNCTION = {
                                 },
                                 type: {
                                     type: 'string',
-                                    enum: ['user', 'server', 'database', 'decision', 'step'] as const satisfies readonly NodeType[],
-                                    description: 'Type of node: user (actors), server (services), database (storage), decision (if/else), step (process)'
+                                    enum: [
+                                        // Tldraw geo shapes (preferred)
+                                        'rectangle', 'ellipse', 'diamond', 'cloud',
+                                        // Special types for icons and actors
+                                        'icon', 'actor',
+                                        // Legacy abstract types (backward compatibility)
+                                        'user', 'server', 'database', 'decision', 'step'
+                                    ] as const satisfies readonly NodeType[],
+                                    description: 'Type of node. Prefer Tldraw geo shapes: rectangle (boxes), ellipse (rounded), diamond (decisions), cloud (abstract). Special: icon (external logos via CDN), actor (user/person). Legacy: user, server, database, decision, step'
+                                },
+                                iconName: {
+                                    type: 'string',
+                                    description: 'Optional. Technical slug for external icon (e.g., "react", "amazonwebservices", "docker", "python"). Used with type="icon" to load from SimpleIcons CDN.'
+                                },
+                                x: {
+                                    type: 'number',
+                                    description: 'Optional. Manual X coordinate for precise positioning'
+                                },
+                                y: {
+                                    type: 'number',
+                                    description: 'Optional. Manual Y coordinate for precise positioning'
                                 }
                             },
                             required: ['id', 'label', 'type']
@@ -64,10 +83,10 @@ export const GENERATE_DIAGRAM_FUNCTION = {
                     },
                     explanation: {
                         type: 'string',
-                        description: 'A markdown summary of the architecture flow and key decisions.'
+                        description: 'Optional markdown summary of the architecture flow and key decisions.'
                     }
                 },
-                required: ['nodes', 'edges', 'explanation']
+                required: ['nodes', 'edges']
             }
         },
         required: ['diagram_data']

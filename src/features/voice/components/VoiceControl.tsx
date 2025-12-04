@@ -2,8 +2,8 @@
 
 import { Editor } from '@tldraw/tldraw'
 import { useCallback } from 'react'
-import { useDiagramAgent } from '@/hooks/useDiagramAgent'
-import type { DiagramData } from '@/types'
+import { useDiagramAgent } from '@diagram/hooks/useDiagramAgent'
+import type { DiagramData } from '@shared/types'
 
 interface VoiceControlProps {
     editor: Editor

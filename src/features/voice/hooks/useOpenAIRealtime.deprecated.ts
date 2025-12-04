@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { SYSTEM_PROMPT } from '@/lib/systemPrompt'
-import { GENERATE_DIAGRAM_FUNCTION } from '@/lib/functionDefinitions'
-import type { RealtimeState, UseOpenAIRealtimeProps, AudioRecorderRef } from '@/types'
+import { SYSTEM_PROMPT } from '../lib/systemPrompt'
+import { GENERATE_DIAGRAM_FUNCTION } from '../lib/functionDefinitions'
+import type { RealtimeState, UseOpenAIRealtimeProps, AudioRecorderRef } from '@shared/types'
 
 /**
  * Hook personnalisé pour gérer l'OpenAI Realtime API via WebSocket
