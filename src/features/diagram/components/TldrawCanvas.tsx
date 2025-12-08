@@ -5,10 +5,22 @@ import '@tldraw/tldraw/tldraw.css'
 import { useCallback, useMemo } from 'react'
 import { RichNodeShapeUtil } from '@features/diagram/shapes/RichNodeShape'
 
+/**
+ * Props for the TldrawCanvas component.
+ */
 interface TldrawCanvasProps {
+  /** Callback triggered when the Tldraw editor is mounted. */
   onMount?: (editor: Editor) => void
 }
 
+/**
+ * TldrawCanvas Component.
+ * Wraps the Tldraw editor with custom configurations and shape utilities.
+ * Configures the UI to be minimal (hides default toolbar, menu, etc.) for a focused experience.
+ *
+ * @param props - The props for the component.
+ * @returns The rendered TldrawCanvas component.
+ */
 export default function TldrawCanvas({ onMount }: TldrawCanvasProps) {
   const handleMount = useCallback((editor: Editor) => {
     if (onMount) {
@@ -16,7 +28,7 @@ export default function TldrawCanvas({ onMount }: TldrawCanvasProps) {
     }
   }, [onMount])
 
-  // Configuration pour désactiver tous les éléments UI par défaut
+  // Configuration to disable all default UI elements
   const components: TLComponents = {
     Toolbar: null,
     HelpMenu: null,

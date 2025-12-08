@@ -1,19 +1,40 @@
 import React, { useRef, useEffect } from 'react';
 import { VoiceIndicator } from './VoiceIndicator';
 
+/**
+ * Props for the RealtimeStatusPanel component.
+ */
 interface RealtimeStatusPanelProps {
+    /** Indicates if the session is currently active. */
     isActive: boolean;
+    /** Indicates if the microphone is currently recording. */
     isListening: boolean;
+    /** Indicates if the session is currently connecting. */
     isConnecting: boolean;
+    /** Current error message, if any. */
     error: string | null;
+    /** Current audio level for visualization (0-1). */
     audioLevel: number;
+    /** List of recent events to display in the log. */
     events: unknown[];
+    /** Arguments of the last tool call, for debugging. */
     lastToolCallArgs: string | null;
+    /** Callback to toggle the recording session. */
     onToggleSession: () => void;
+    /** Callback to disconnect the session. */
     onDisconnect: () => void;
+    /** Callback to reset the session and clear context. */
     onReset: () => void;
 }
 
+/**
+ * RealtimeStatusPanel Component.
+ * Displays the status of the realtime voice session, including connection state,
+ * audio visualization, logs, and controls.
+ *
+ * @param props - The props for the component.
+ * @returns The rendered RealtimeStatusPanel component.
+ */
 export const RealtimeStatusPanel: React.FC<RealtimeStatusPanelProps> = ({
     isActive,
     isListening,
@@ -130,7 +151,7 @@ export const RealtimeStatusPanel: React.FC<RealtimeStatusPanelProps> = ({
                 </div>
                 <div ref={logsRef} className="flex-1 overflow-y-auto p-2 space-y-1 bg-white">
                     {events.length === 0 && <span className="text-gray-300 italic">No events yet</span>}
-                    {events.map((e: any, i) => (
+                    {events.map((e: any, i) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                         <div key={i} className="flex gap-2 text-[10px] border-b border-gray-50 pb-1 last:border-0">
                             <span className="text-gray-400 w-16 shrink-0 truncate" title={e.event_id || 'no-id'}>
                                 {e.type?.split('.').pop()}

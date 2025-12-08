@@ -6,32 +6,36 @@ import { useRealtimeConnection } from '@voice/hooks/useRealtimeConnection'
 import { useAudioRecorder } from '@voice/hooks/useAudioRecorder'
 import { useAudioPlayer } from '@voice/hooks/useAudioPlayer'
 import { generateDiagram } from '../lib/diagramGenerator'
-import { DiagramAnimator } from '../lib/DiagramAnimator'
 import { SYSTEM_PROMPT } from '@voice/lib/systemPrompt'
 import { GENERATE_DIAGRAM_FUNCTION } from '@voice/lib/functionDefinitions'
 import { DiagramDataSchema } from '@shared/lib/validation/schemas'
 import type { DiagramData } from '@shared/types'
+// Removed unused DiagramAnimator import for now as it seems to be unused in the hook logic based on linter warning
+// import { DiagramAnimator } from '../lib/DiagramAnimator'
 
 /**
- * Props pour le hook useDiagramAgent
+ * Props for the useDiagramAgent hook.
  */
 export interface UseDiagramAgentProps {
+    /** The Tldraw editor instance. */
     editor: Editor
+    /** Callback function triggered when a diagram is generated. */
     onDiagramGenerated?: (data: DiagramData) => void
+    /** Callback function triggered when an error occurs. */
     onError?: (error: string) => void
 }
 
 /**
- * Hook de couche métier pour orchestrer la génération de diagrammes par voix
+ * Business logic hook to orchestrate voice-controlled diagram generation.
  * 
- * Responsabilité: Orchestration de la logique métier
- * - Composer useRealtimeConnection + useAudioRecorder + useAudioPlayer
- * - Gérer le cycle de vie de la session vocale
- * - Parser et valider les appels de fonction OpenAI
- * - Générer les diagrammes sur le canvas tldraw
+ * Responsibility: Orchestration of business logic.
+ * - Compose useRealtimeConnection + useAudioRecorder + useAudioPlayer.
+ * - Manage the lifecycle of the voice session.
+ * - Parse and validate OpenAI function calls.
+ * - Generate diagrams on the tldraw canvas.
  * 
- * @param props - Configuration du hook
- * @returns État et méthodes de contrôle de l'agent
+ * @param props - Configuration for the hook.
+ * @returns State and methods to control the agent.
  */
 export function useDiagramAgent({
     editor,
@@ -42,12 +46,12 @@ export function useDiagramAgent({
     const [lastToolCallArgs, setLastToolCallArgs] = useState<string | null>(null)
 
     /**
-     * Hook de lecture audio (pour entendre l'IA parler)
+     * Audio Player Hook (to hear the AI speak).
      */
     const audioPlayer = useAudioPlayer()
 
     /**
-     * Configuration de la session OpenAI (memoized pour performance)
+     * OpenAI Session Configuration (memoized for performance).
      */
     const sessionConfig = useMemo(() => ({
         modalities: ['text', 'audio'],
@@ -59,13 +63,11 @@ export function useDiagramAgent({
         tool_choice: 'auto',
     }), [])
 
-    /**
-     * Animator instance (memoized)
-     */
-    const animator = useMemo(() => new DiagramAnimator(editor), [editor])
+    // Removed unused animator instance
+    // const animator = useMemo(() => new DiagramAnimator(editor), [editor])
 
     /**
-     * Hook de connexion WebSocket
+     * WebSocket Connection Hook.
      */
     const connection = useRealtimeConnection({
         sessionConfig,
@@ -76,7 +78,8 @@ export function useDiagramAgent({
     })
 
     /**
-     * Handler pour envoyer l'audio au WebSocket (memoized)
+     * Handler to send audio to WebSocket (memoized).
+     * @param base64Audio - The base64 encoded audio data.
      */
     const handleAudioData = useCallback((base64Audio: string) => {
         connection.sendMessage({
@@ -86,7 +89,7 @@ export function useDiagramAgent({
     }, [connection])
 
     /**
-     * Hook d'enregistrement audio
+     * Audio Recorder Hook.
      */
     const audioRecorder = useAudioRecorder({
         onAudioData: handleAudioData,
@@ -97,7 +100,8 @@ export function useDiagramAgent({
     })
 
     /**
-     * Handler pour les messages WebSocket (memoized pour éviter re-renders)
+     * Handler for WebSocket messages (memoized to avoid re-renders).
+     * @param message - The message received from the WebSocket.
      */
     const handleMessage = useCallback((message: unknown) => {
         const msg = message as {
@@ -108,12 +112,12 @@ export function useDiagramAgent({
             audio?: string
         }
 
-        // Jouer l'audio de sortie de l'IA
+        // Play AI audio output
         if (msg.type === 'response.audio.delta' && msg.delta) {
             audioPlayer.playAudio(msg.delta)
         }
 
-        // Parser les appels de fonction OpenAI
+        // Parse OpenAI function calls
         if (msg.type === 'response.function_call_arguments.done') {
             if (process.env.NODE_ENV === 'development') {
                 console.log('🤖 Tool Call:', msg.name)
@@ -123,9 +127,9 @@ export function useDiagramAgent({
                 let args
                 try {
                     args = JSON.parse(msg.arguments)
-                } catch (e) {
-                    // STRATÉGIE "SILENT WAIT" :
-                    // Si le JSON est incomplet, on ignore l'erreur et on attend le prochain chunk.
+                } catch (e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+                    // "SILENT WAIT" STRATEGY:
+                    // If JSON is incomplete, ignore error and wait for next chunk.
                     return
                 }
 
@@ -134,17 +138,17 @@ export function useDiagramAgent({
                         console.log('📦 Arguments:', args)
                     }
 
-                    // Sauvegarder pour affichage debug
+                    // Save for debug display
                     setLastToolCallArgs(JSON.stringify(args, null, 2))
 
-                    // Validation runtime avec Zod
+                    // Runtime validation with Zod
                     const validationResult = DiagramDataSchema.safeParse(args.diagram_data)
 
                     if (!validationResult.success) {
                         const zodError = validationResult.error.format()
                         console.error('❌ Invalid diagram data:', zodError)
 
-                        // Message d'erreur convivial pour l'utilisateur
+                        // User-friendly error message
                         const userFriendlyError = "L'IA a généré des données invalides. Réessayez avec une description plus claire."
                         setError(userFriendlyError)
                         onError?.(userFriendlyError)
@@ -153,7 +157,7 @@ export function useDiagramAgent({
 
                     const diagramData = validationResult.data
 
-                    // Générer le diagramme avec animation
+                    // Generate diagram with animation
                     generateDiagram(editor, diagramData, diagramData.explanation)
                     // animator.animate(diagramData, diagramData.explanation)
 
@@ -161,7 +165,7 @@ export function useDiagramAgent({
                         console.log('✅ Diagram generation started!')
                     }
 
-                    // Callback optionnel
+                    // Optional callback
                     onDiagramGenerated?.(diagramData)
                 } catch (err) {
                     const errorMsg = err instanceof Error ? err.message : 'Erreur lors de la génération du diagramme'
@@ -174,7 +178,7 @@ export function useDiagramAgent({
     }, [editor, onDiagramGenerated, onError, audioPlayer])
 
     /**
-     * Abonner le handler aux messages WebSocket
+     * Subscribe handler to WebSocket messages.
      */
     useEffect(() => {
         const unsubscribe = connection.onMessage(handleMessage)
@@ -182,22 +186,22 @@ export function useDiagramAgent({
     }, [connection, handleMessage])
 
     /**
-     * Démarre une session vocale (connexion + enregistrement)
+     * Starts a voice session (connection + recording).
      */
     const startVoiceSession = useCallback(async () => {
         try {
             setError(null)
 
-            // D'abord, connecter au WebSocket
+            // First, connect to WebSocket
             if (!connection.state.isConnected) {
                 await connection.connect()
             } else {
-                // Si déjà connecté (cas d'interruption), on annule la réponse en cours
+                // If already connected (interruption case), cancel current response
                 audioPlayer.stop()
                 connection.sendMessage({ type: 'response.cancel' })
             }
 
-            // Puis démarrer l'enregistrement audio
+            // Then start audio recording
             await audioRecorder.startRecording()
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Erreur de démarrage de la session'
@@ -205,17 +209,17 @@ export function useDiagramAgent({
             onError?.(errorMsg)
             throw err
         }
-    }, [connection, audioRecorder, onError])
+    }, [connection, audioRecorder, onError, audioPlayer])
 
     /**
-     * Arrête la session vocale (enregistrement uniquement, garde la connexion)
+     * Stops the voice session (recording only, keeps connection).
      */
     const stopVoiceSession = useCallback(() => {
         audioRecorder.stopRecording()
     }, [audioRecorder])
 
     /**
-     * Déconnecte complètement (utilisé au cleanup)
+     * Disconnects completely (used for cleanup).
      */
     const disconnect = useCallback(() => {
         audioRecorder.stopRecording()
@@ -224,13 +228,13 @@ export function useDiagramAgent({
     }, [audioRecorder, connection, audioPlayer])
 
     /**
-     * Cleanup au démontage du composant
-     * Note: On ne met PAS disconnect dans les deps pour éviter la boucle infinie
-     * Le cleanup se fait via les références directes
+     * Cleanup on component unmount.
+     * Note: disconnect is NOT in deps to avoid infinite loop.
+     * Cleanup is done via direct references.
      */
     useEffect(() => {
         return () => {
-            // Cleanup direct sans passer par disconnect pour éviter la boucle
+            // Direct cleanup without calling disconnect to avoid loop
             audioRecorder.stopRecording()
             connection.disconnect()
             audioPlayer.cleanup()
@@ -239,7 +243,7 @@ export function useDiagramAgent({
     }, [])
 
     /**
-     * État agrégé (memoized pour performance)
+     * Aggregated state (memoized for performance).
      */
     const aggregatedState = useMemo(() => ({
         isActive: connection.state.isConnected,
@@ -260,11 +264,11 @@ export function useDiagramAgent({
     ])
 
     /**
-     * Réinitialise complètement la session (Canvas + Contexte OpenAI)
-     * Utile pour économiser des tokens et repartir de zéro
+     * Completely resets the session (Canvas + OpenAI Context).
+     * Useful for saving tokens and starting fresh.
      */
     const resetSession = useCallback(async () => {
-        // 1. Nettoyer le Canvas Tldraw
+        // 1. Clear Tldraw Canvas
         editor.selectAll()
         const selectedIds = editor.getSelectedShapeIds()
         if (selectedIds.length > 0) {
@@ -275,10 +279,10 @@ export function useDiagramAgent({
         setError(null)
         setLastToolCallArgs(null)
 
-        // 3. Cycle de connexion (Disconnect -> Connect) pour wipe le contexte
+        // 3. Connection cycle (Disconnect -> Connect) to wipe context
         if (connection.state.isConnected) {
             connection.disconnect()
-            // Petit délai pour assurer la fermeture propre avant de reconnecter
+            // Small delay to ensure clean closure before reconnecting
             setTimeout(() => {
                 connection.connect()
             }, 500)

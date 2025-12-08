@@ -5,6 +5,14 @@ import type { DiagramData } from '@shared/types'
 
 
 
+/**
+ * Generates a diagram on the Tldraw editor based on the provided data.
+ * It handles creating nodes, edges, applying layout, and animations.
+ *
+ * @param editor - The Tldraw editor instance.
+ * @param data - The diagram data (nodes and edges).
+ * @param explanation - Optional textual explanation to add to the canvas.
+ */
 export async function generateDiagram(
     editor: Editor,
     data: DiagramData,
@@ -15,19 +23,19 @@ export async function generateDiagram(
         return
     }
 
-    // Options globales pour le style (désactiver le style "brouillon")
+    // Global style options (disable "draft" style)
     editor.setStyleForNextShapes(DefaultFontStyle, 'sans')
     editor.setStyleForNextShapes(DefaultDashStyle, 'solid')
     editor.setStyleForNextShapes(DefaultSizeStyle, 'm')
 
-    // Helper pour les dimensions
+    // Helper for dimensions
     const getNodeDimensions = (type: string) => {
         if (type === 'icon' || type === 'actor' || type === 'mobile' || type === 'payment') return { w: 80, h: 80 }
         if (['server', 'database', 'person'].includes(type)) return { w: 100, h: 100 }
         return { w: 200, h: 60 } // Standard Rectangle
     }
 
-    // 1. Calcul du Layout avec les VRAIES dimensions
+    // 1. Calculate Layout with REAL dimensions
     const layoutNodes: LayoutNode[] = data.nodes.map((node) => {
         const dim = getNodeDimensions(node.type)
         return {
@@ -42,23 +50,24 @@ export async function generateDiagram(
         to: edge.target,
     }))
 
-    // Calcul du layout (TB pour top-to-bottom)
+    // Calculate layout (TB for top-to-bottom)
     const layout = autoLayout(layoutNodes, layoutEdges, 'TB')
 
-    // 0. ID Mapping : Table de correspondance ID IA -> ID Tldraw
-    // Ceci est crucial pour que les edges retrouvent les bons nodes
-    const idMap = new Map<string, any>(); // Utilise TLShapeId idéalement mais any passe avec createShapeId
+    // 0. ID Mapping: AI ID -> Tldraw ID map
+    // Critical for edges to find the correct nodes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars
+    const idMap = new Map<string, any>(); // Uses TLShapeId ideally but any passes with createShapeId
 
-    // 2. Setup Caméra (Approximation)
+    // 2. Setup Camera (Approximation)
     if (layout.width > 0 && layout.height > 0) {
         const center = { x: layout.width / 2, y: layout.height / 2 }
         editor.centerOnPoint({ x: center.x, y: center.y })
         editor.zoomToFit()
     }
 
-    // 3. Animation des Nœuds
+    // 3. Animate Nodes
     for (const node of data.nodes) {
-        // Génération d'un ID Tldraw frais
+        // Generate a fresh Tldraw ID
         const shapeId = createShapeId();
         idMap.set(node.id, shapeId);
 
@@ -67,7 +76,8 @@ export async function generateDiagram(
         const y = node.y || layoutPos?.y || 0;
         const dim = getNodeDimensions(node.type)
 
-        // Logique de création de shape
+        // Shape creation logic
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let props: any = {
             w: dim.w,
             h: dim.h,
@@ -75,13 +85,13 @@ export async function generateDiagram(
             nodeType: node.type || 'action',
         };
 
-        let shapeType = 'rich-node';
+        const shapeType = 'rich-node';
 
-        // CAS A : C'est une Icône
+        // CASE A: It's an Icon
         if (node.type === 'icon' && node.iconName) {
             props = { ...props, nodeType: 'icon', iconName: node.iconName };
         }
-        // CAS B : Architecture Nodes
+        // CASE B: Architecture Nodes
         else if (['server', 'database', 'person', 'mobile', 'payment', 'actor'].includes(node.type)) {
             props = { ...props, nodeType: node.type === 'actor' ? 'person' : node.type };
         }
@@ -94,17 +104,17 @@ export async function generateDiagram(
             props: props,
         });
 
-        // Délai pour l'effet "Pop"
+        // Delay for "Pop" effect
         await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    // 4. Animation des Liens (Mode Coordonnées - Infaillible)
+    // 4. Animate Edges (Coordinates Mode - Fail-safe)
     for (const edge of data.edges) {
-        // Retrouver les positions calculées
+        // Retrieve calculated positions
         const sPos = layout.nodes.get(edge.source)
         const tPos = layout.nodes.get(edge.target)
 
-        // Retrouver les métadonnées pour les dimensions
+        // Retrieve metadata for dimensions
         const sNodeData = data.nodes.find(n => n.id === edge.source)
         const tNodeData = data.nodes.find(n => n.id === edge.target)
 
@@ -116,7 +126,7 @@ export async function generateDiagram(
         const sDim = getNodeDimensions(sNodeData.type)
         const tDim = getNodeDimensions(tNodeData.type)
 
-        // Calcul des centres
+        // Calculate centers
         const startX = sPos.x + sDim.w / 2
         const startY = sPos.y + sDim.h / 2
         const endX = tPos.x + tDim.w / 2
@@ -124,14 +134,14 @@ export async function generateDiagram(
 
         const arrowId = createShapeId()
 
-        // A. La Flèche (Points Absolus)
+        // A. The Arrow (Absolute Points)
         editor.createShape({
             id: arrowId,
             type: 'arrow',
             x: 0,
             y: 0,
             props: {
-                // On passe des points explicites {x, y}
+                // Pass explicit points {x, y}
                 start: { x: startX, y: startY },
                 end: { x: endX, y: endY },
                 arrowheadStart: 'none',
@@ -139,7 +149,7 @@ export async function generateDiagram(
             },
         })
 
-        // B. Le Label (Toujours séparé pour la sécurité)
+        // B. The Label (Always separate for safety)
         if (edge.label) {
             const midX = (startX + endX) / 2
             const midY = (startY + endY) / 2
@@ -160,11 +170,11 @@ export async function generateDiagram(
             })
         }
 
-        // Délai pour l'effet "Dessin en direct"
+        // Delay for "Live drawing" effect
         await new Promise(resolve => setTimeout(resolve, 100))
     }
 
-    // 5. Ajouter l'explication (si présente)
+    // 5. Add explanation (if present)
     if (explanation && explanation.trim().length > 0) {
         const textX = (layout.width || 0) + 50;
 
@@ -182,6 +192,6 @@ export async function generateDiagram(
         });
     }
 
-    // 5. Final : Cadrage parfait
+    // 5. Final: Perfect Framing
     editor.zoomToFit()
 }

@@ -6,12 +6,17 @@ import { GENERATE_DIAGRAM_FUNCTION } from '../lib/functionDefinitions'
 import type { RealtimeState, UseOpenAIRealtimeProps, AudioRecorderRef } from '@shared/types'
 
 /**
- * Hook personnalisé pour gérer l'OpenAI Realtime API via WebSocket
+ * Custom hook to manage OpenAI Realtime API via WebSocket.
  * 
- * IMPORTANT: Ce hook nécessite une session ephemeral token obtenue via /api/realtime/session
+ * DEPRECATED: This hook handles too many responsibilities (connection + audio).
+ * It has been split into `useRealtimeConnection` and `useAudioRecorder`.
+ * Kept for reference or fallback.
  * 
- * @param props - Configuration du hook
- * @returns État et méthodes de contrôle
+ * IMPORTANT: This hook requires an ephemeral session token obtained via /api/realtime/session
+ *
+ * @deprecated Use useRealtimeConnection and useAudioRecorder instead.
+ * @param props - Hook configuration.
+ * @returns State and control methods.
  */
 export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtimeProps = {}) {
     const [state, setState] = useState<RealtimeState>({
@@ -25,11 +30,11 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
 
 
     /**
-     * Connecte au WebSocket OpenAI Realtime API
+     * Connects to the OpenAI Realtime API WebSocket.
      */
     const connect = useCallback(async () => {
         try {
-            // Étape 1: Obtenir un token ephemeral depuis notre backend
+            // Step 1: Obtain an ephemeral token from our backend
             if (process.env.NODE_ENV === 'development') {
                 console.log('🔑 Requesting ephemeral session from backend...')
             }
@@ -45,12 +50,12 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
                 console.log('✅ Ephemeral session created')
             }
 
-            // Étape 2: Connecter au WebSocket avec le token dans l'URL
+            // Step 2: Connect to the WebSocket with the token in the URL
             const url = `wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17`
 
-            // Créer la promesse de connexion
+            // Create connection promise
             await new Promise<void>((resolve, reject) => {
-                // Créer la connexion WebSocket avec le token dans les sous-protocoles
+                // Create WebSocket connection with token in subprotocols
                 const ws = new WebSocket(url, [
                     'realtime',
                     `openai-insecure-api-key.${ephemeralKey}`,
@@ -58,14 +63,14 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
                 ])
                 wsRef.current = ws
 
-                // Event: Connexion ouverte
+                // Event: Connection open
                 ws.onopen = () => {
                     if (process.env.NODE_ENV === 'development') {
                         console.log('✅ Connected to OpenAI')
                     }
                     setState(prev => ({ ...prev, isConnected: true, error: null }))
 
-                    // Configurer la session
+                    // Configure session
                     ws.send(JSON.stringify({
                         type: 'session.update',
                         session: {
@@ -75,7 +80,7 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
                             output_audio_format: 'pcm16',
                             turn_detection: { type: 'server_vad' },
                             tools: [GENERATE_DIAGRAM_FUNCTION],
-                            tool_choice: 'auto', // On garde auto, mais on améliore le prompt système si besoin
+                            tool_choice: 'auto', // Keep auto, but improve system prompt if needed
                         }
                     }))
                     if (process.env.NODE_ENV === 'development') {
@@ -84,18 +89,18 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
                     resolve()
                 }
 
-                // Event: Message reçu
+                // Event: Message received
                 ws.onmessage = (e) => {
                     const msg = JSON.parse(e.data)
 
-                    // Debug: Voir ce que l'IA comprend (Transcription)
+                    // Debug: See what AI understands (Transcription)
                     if (msg.type === 'response.audio_transcript.delta') {
                         if (process.env.NODE_ENV === 'development') {
                             console.log('📝 AI Speech:', msg.delta)
                         }
                     }
 
-                    // Debug: Voir ce que l'IA a entendu (Input)
+                    // Debug: See what AI heard (Input)
                     if (msg.type === 'conversation.item.input_audio_transcription.completed') {
                         if (process.env.NODE_ENV === 'development') {
                             console.log('👂 User said:', msg.transcript)
@@ -111,7 +116,7 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
                     }
                 }
 
-                // Event: Erreur
+                // Event: Error
                 ws.onerror = (error) => {
                     if (process.env.NODE_ENV === 'development') {
                         console.error('❌ WebSocket error:', error)
@@ -123,7 +128,7 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
                     }
                 }
 
-                // Event: Fermeture
+                // Event: Close
                 ws.onclose = () => {
                     if (process.env.NODE_ENV === 'development') {
                         console.log('🔌 WebSocket disconnected')
@@ -143,7 +148,7 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
     }, [onFunctionCall, onError])
 
     /**
-     * Déconnecte du WebSocket
+     * Disconnects from the WebSocket.
      */
     const disconnect = useCallback(() => {
         if (wsRef.current) {
@@ -170,31 +175,31 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
     }, [])
 
     /**
-     * Démarre l'enregistrement audio
+     * Starts audio recording.
      */
     const startRecording = useCallback(async () => {
         try {
-            // Vérifier que le WebSocket est prêt
+            // Check if WebSocket is ready
             if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-                throw new Error('Non connecté au WebSocket')
+                throw new Error('Not connected to WebSocket')
             }
 
-            // Demander l'accès au microphone
+            // Request microphone access
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    sampleRate: 24000, // OpenAI demande 24kHz
+                    sampleRate: 24000, // OpenAI requires 24kHz
                     channelCount: 1,   // Mono
                     echoCancellation: true,
                     noiseSuppression: true,
                 }
             })
 
-            // Créer un AudioContext à 24kHz
+            // Create AudioContext at 24kHz
             const audioContext = new AudioContext({ sampleRate: 24000 })
             const source = audioContext.createMediaStreamSource(stream)
 
-            // Créer un ScriptProcessorNode pour capturer les échantillons PCM
-            // Note: ScriptProcessorNode est déprécié mais AudioWorklet nécessite un fichier séparé
+            // Create ScriptProcessorNode to capture PCM samples
+            // Note: ScriptProcessorNode is deprecated but AudioWorklet requires a separate file
             const bufferSize = 4096
             const processor = audioContext.createScriptProcessor(bufferSize, 1, 1)
 
@@ -202,20 +207,20 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
                 if (wsRef.current?.readyState === WebSocket.OPEN) {
                     const inputData = e.inputBuffer.getChannelData(0)
 
-                    // Convertir Float32Array en Int16Array (PCM16)
+                    // Convert Float32Array to Int16Array (PCM16)
                     const pcm16 = new Int16Array(inputData.length)
                     for (let i = 0; i < inputData.length; i++) {
-                        // Convertir de [-1, 1] à [-32768, 32767]
+                        // Convert from [-1, 1] to [-32768, 32767]
                         const s = Math.max(-1, Math.min(1, inputData[i]))
                         pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF
                     }
 
-                    // Convertir en base64
+                    // Convert to base64
                     const base64Audio = btoa(
                         String.fromCharCode(...new Uint8Array(pcm16.buffer))
                     )
 
-                    // Envoyer au WebSocket
+                    // Send to WebSocket
                     const audioMessage = {
                         type: 'input_audio_buffer.append',
                         audio: base64Audio,
@@ -224,11 +229,11 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
                 }
             }
 
-            // Connecter les nœuds
+            // Connect nodes
             source.connect(processor)
             processor.connect(audioContext.destination)
 
-            // Stocker les références pour cleanup
+            // Store references for cleanup
             mediaRecorderRef.current = {
                 stream,
                 audioContext,
@@ -244,14 +249,14 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
             if (process.env.NODE_ENV === 'development') {
                 console.error('Recording error:', err)
             }
-            const errorMsg = err instanceof Error ? err.message : 'Impossible d\'accéder au microphone'
+            const errorMsg = err instanceof Error ? err.message : 'Unable to access microphone'
             setState((prev) => ({ ...prev, error: errorMsg }))
             onError?.(errorMsg)
         }
     }, [onError])
 
     /**
-     * Arrête l'enregistrement audio
+     * Stops audio recording.
      */
     const stopRecording = useCallback(() => {
         if (mediaRecorderRef.current) {
@@ -277,14 +282,14 @@ export function useOpenAIRealtime({ onFunctionCall, onError }: UseOpenAIRealtime
                 console.log('⏹️ Recording stopped')
             }
 
-            // Note: On ne commit PAS le buffer ici car avec server_vad,
-            // OpenAI détecte automatiquement la fin de l'audio et crée une réponse.
-            // Committing manuellement causait des erreurs "buffer too small" et "response already in progress"
+            // Note: We do NOT commit the buffer here because with server_vad,
+            // OpenAI automatically detects the end of audio and creates a response.
+            // Committing manually caused "buffer too small" and "response already in progress" errors.
         }
     }, [])
 
     /**
-     * Cleanup à la destruction du composant
+     * Cleanup on component unmount.
      */
     useEffect(() => {
         return () => {

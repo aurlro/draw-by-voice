@@ -1,10 +1,10 @@
 import type { NodeType } from '@shared/types'
 
 /**
- * Function definition pour OpenAI Realtime API
- * Définit la structure de la fonction generate_diagram
+ * Function definition for OpenAI Realtime API.
+ * Defines the structure of the `generate_diagram` function that the AI can call.
  * 
- * NOTE: Cette définition doit être synchronisée avec DiagramDataSchema dans lib/schemas.ts
+ * NOTE: This definition must be synchronized with DiagramDataSchema in lib/schemas.ts
  */
 export const GENERATE_DIAGRAM_FUNCTION = {
     type: 'function',

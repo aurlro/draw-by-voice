@@ -1,9 +1,13 @@
-
-
-
 /**
- * API Route pour créer une session ephemeral OpenAI
- * GET /api/realtime/session
+ * API Route to create an ephemeral OpenAI Realtime session.
+ *
+ * Endpoint: GET /api/realtime/session
+ *
+ * This route fetches an ephemeral client secret from OpenAI's API.
+ * This secret allows the client to connect directly to the Realtime WebSocket API
+ * without exposing the main API key.
+ *
+ * @returns JSON response with the client secret and expiration or an error message.
  */
 export async function GET() {
     try {
@@ -17,7 +21,7 @@ export async function GET() {
             )
         }
 
-        // Créer une session ephemeral
+        // Create an ephemeral session
         const response = await fetch('https://api.openai.com/v1/realtime/sessions', {
             method: 'POST',
             headers: {
