@@ -25,7 +25,8 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
         lastToolCallArgs,
         startVoiceSession,
         stopVoiceSession,
-        disconnect
+        disconnect,
+        resetSession
     } = useDiagramAgent({
         editor,
         onDiagramGenerated,
@@ -105,6 +106,7 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
             lastToolCallArgs={lastToolCallArgs}
             onToggleSession={toggleVoiceSession}
             onDisconnect={disconnect}
+            onReset={resetSession}
         />
     )
 }

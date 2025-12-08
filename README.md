@@ -24,7 +24,8 @@
 ### 🎨 Génération de Diagrammes
 - **Auto-layout** : Organisation automatique avec Dagre
 - **Types de nœuds** : User, Server, Database, Decision, Step
-- **Icônes intelligentes** : Détection automatique (AWS, React, Node.js, etc.)
+- **Icônes Universelles** : Intégration **Iconify** (200k+ icônes) + Logo Detection
+- **Support Français** : Interaction et génération 100% en français
 - **Explications textuelles** : Résumé markdown affiché sur le canvas
 
 ### 🛡️ Sécurité & Robustesse
@@ -101,11 +102,16 @@ OPENAI_API_KEY=sk-proj-...
 - ✅ Afficher sur le canvas avec auto-layout
 - ✅ Ajouter une explication textuelle
 - ✅ Vous répondre vocalement
+104: 
 
-### 3️⃣ Modes de Test
+### 3️⃣ Optimisation (Coûts & Session)
+Utiliser le bouton **"POUBELLE / RESET"** pour :
+- Effacer le canvas
+- **Réinitialiser le contexte IA** (Saves Tokens & $$$)
+- Démarrer une nouvelle conversation "fraîche"
 
-- **Mode Démo** : Bouton "Load Demo" pour exemples rapides
-- **Mock Data** : Test sans API (fichier `lib/mockData.ts`)
+### 4️⃣ Modes de Développement
+- **Mock Data** : Test sans API (fichier `lib/mockData.ts`) via E2E tests
 
 ---
 

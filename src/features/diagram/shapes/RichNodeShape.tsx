@@ -1,3 +1,4 @@
+import React from 'react'
 import {
     BaseBoxShapeUtil,
     Geometry2d,
@@ -75,6 +76,28 @@ type RichNodeShape = TLBaseShape<
     }
 >
 
+// Composant SafeIcon pour gérer les erreurs de chargement d'image
+const SafeIcon = ({ url, alt, fallbackText }: { url: string, alt: string, fallbackText: string }) => {
+    const [error, setError] = React.useState(false);
+
+    if (error) {
+        return (
+            <div className="w-[60px] h-[60px] rounded-xl flex items-center justify-center bg-gray-100 text-gray-500 font-bold border border-gray-200">
+                {fallbackText.charAt(0).toUpperCase()}
+            </div>
+        )
+    }
+
+    return (
+        <img
+            src={url}
+            alt={alt}
+            style={{ width: '60px', height: '60px', objectFit: 'contain' }}
+            onError={() => setError(true)}
+        />
+    )
+}
+
 export class RichNodeShapeUtil extends BaseBoxShapeUtil<RichNodeShape> {
     static override type = 'rich-node' as const
     static override props: RecordProps<RichNodeShape> = {
@@ -116,12 +139,22 @@ export class RichNodeShapeUtil extends BaseBoxShapeUtil<RichNodeShape> {
             )
         }
 
-        // CAS SPECIAL: Icone externe (Simple Icons)
+        // CAS SPECIAL: Icone externe (Iconify ou SimpleIcons)
         if (nodeType === 'icon' && iconName) {
-            const iconUrl = `https://cdn.simpleicons.org/${iconName.toLowerCase()}/000000`
+            // Support pour Iconify (format "collection:name") ou SimpleIcons (slug)
+            let iconUrl = '';
+            if (iconName.includes(':')) {
+                // Iconify API (SVG)
+                const [collection, name] = iconName.split(':');
+                iconUrl = `https://api.iconify.design/${collection}/${name}.svg`;
+            } else {
+                // Fallback SimpleIcons
+                iconUrl = `https://cdn.simpleicons.org/${iconName.toLowerCase()}/000000`;
+            }
+
             return (
                 <HTMLContainer id={shape.id} style={{ pointerEvents: 'all', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                    <img src={iconUrl} alt={iconName} style={{ width: '60px', height: '60px' }} />
+                    <SafeIcon url={iconUrl} alt={iconName} fallbackText={text} />
                     <span className="font-draw text-sm font-medium">{text}</span>
                 </HTMLContainer>
             )
