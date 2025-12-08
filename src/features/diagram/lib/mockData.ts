@@ -1,7 +1,7 @@
 import type { DiagramData } from '@shared/types'
 
 /**
- * Données mockées pour tester le système sans API réelle
+ * Mock data for testing the system without a real API.
  */
 
 export const MOCK_AWS_ARCHITECTURE: DiagramData = {
@@ -78,7 +78,7 @@ export const MOCK_CICD_PIPELINE: DiagramData = {
 }
 
 /**
- * Liste de tous les diagrammes mockés disponibles
+ * List of all available mock diagrams.
  */
 export const MOCK_DIAGRAMS: Record<string, DiagramData> = {
     'AWS Architecture': MOCK_AWS_ARCHITECTURE,

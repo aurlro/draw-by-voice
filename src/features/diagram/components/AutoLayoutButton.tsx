@@ -3,19 +3,34 @@
 import { createShapeId, Editor } from '@tldraw/tldraw'
 import { autoLayout, LayoutNode, LayoutEdge } from '../lib/autoLayout'
 
+/**
+ * Props for the AutoLayoutButton component.
+ */
 interface AutoLayoutButtonProps {
+    /** The Tldraw editor instance. */
     editor: Editor
 }
 
+/**
+ * AutoLayoutButton Component.
+ * Renders a button that triggers a hardcoded layout generation for testing purposes.
+ * It creates a set of nodes and edges and applies the auto-layout algorithm.
+ *
+ * @param props - The props for the component.
+ * @returns The rendered AutoLayoutButton component.
+ */
 export default function AutoLayoutButton({ editor }: AutoLayoutButtonProps) {
+    /**
+     * Handles the diagram generation and layout.
+     */
     const handleGenerateDiagram = () => {
         if (!editor) return
 
-        // Définir les dimensions des nœuds
+        // Define node dimensions
         const nodeWidth = 150
         const nodeHeight = 80
 
-        // Définir les nœuds du diagramme (3 serveurs + 1 DB)
+        // Define diagram nodes (3 servers + 1 DB)
         const nodeDefinitions: LayoutNode[] = [
             { id: 'server1', width: nodeWidth, height: nodeHeight },
             { id: 'server2', width: nodeWidth, height: nodeHeight },
@@ -23,20 +38,20 @@ export default function AutoLayoutButton({ editor }: AutoLayoutButtonProps) {
             { id: 'database', width: nodeWidth, height: nodeHeight },
         ]
 
-        // Définir les connexions (tous les serveurs vers la DB)
+        // Define connections (all servers to DB)
         const edgeDefinitions: LayoutEdge[] = [
             { from: 'server1', to: 'database' },
             { from: 'server2', to: 'database' },
             { from: 'server3', to: 'database' },
         ]
 
-        // Calculer le layout avec dagre (Left-to-Right)
+        // Calculate layout with dagre (Left-to-Right)
         const layout = autoLayout(nodeDefinitions, edgeDefinitions, 'LR')
 
-        // Créer un Map pour stocker les IDs des shapes créées
+        // Create a Map to store created shape IDs
         const shapeIds = new Map<string, string>()
 
-        // Configuration des couleurs et labels
+        // Configuration for colors and labels
         const nodeConfig = {
             server1: { label: 'Server 1', color: 'blue' },
             server2: { label: 'Server 2', color: 'blue' },
@@ -44,7 +59,7 @@ export default function AutoLayoutButton({ editor }: AutoLayoutButtonProps) {
             database: { label: 'Database', color: 'red' },
         }
 
-        // Créer toutes les shapes des nœuds aux positions calculées
+        // Create all node shapes at calculated positions
         nodeDefinitions.forEach((node) => {
             const position = layout.nodes.get(node.id)
             if (!position) return
@@ -69,7 +84,7 @@ export default function AutoLayoutButton({ editor }: AutoLayoutButtonProps) {
             })
         })
 
-        // Créer les flèches (arrows) entre les nœuds
+        // Create arrows between nodes
         edgeDefinitions.forEach((edge) => {
             const fromNode = layout.nodes.get(edge.from)
             const toNode = layout.nodes.get(edge.to)
@@ -80,13 +95,13 @@ export default function AutoLayoutButton({ editor }: AutoLayoutButtonProps) {
 
             const arrowId = createShapeId()
 
-            // Calculer les coordonnées du centre des nœuds
+            // Calculate center coordinates of nodes
             const fromCenterX = fromNode.x + fromNodeDef.width / 2
             const fromCenterY = fromNode.y + fromNodeDef.height / 2
             const toCenterX = toNode.x + toNodeDef.width / 2
             const toCenterY = toNode.y + toNodeDef.height / 2
 
-            // Créer une flèche en utilisant des coordonnées de points
+            // Create an arrow using point coordinates
             editor.createShape({
                 id: arrowId,
                 type: 'arrow',
@@ -107,10 +122,10 @@ export default function AutoLayoutButton({ editor }: AutoLayoutButtonProps) {
             })
         })
 
-        // Note: Les labels peuvent être ajoutés manuellement en double-cliquant sur les shapes
-        // La configuration des labels sera gérée dans la Phase 3 avec l'IA vocale
+        // Note: Labels can be added manually by double-clicking shapes
+        // Label configuration will be handled in Phase 3 with Voice AI
 
-        // Zoomer pour afficher tout le diagramme
+        // Zoom to fit the entire diagram
         editor.zoomToFit()
     }
 

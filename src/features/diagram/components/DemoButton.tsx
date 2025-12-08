@@ -5,14 +5,29 @@ import { Editor } from '@tldraw/tldraw'
 import { generateDiagram } from '../lib/diagramGenerator'
 import { MOCK_DIAGRAMS } from '../lib/mockData'
 
+/**
+ * Props for the DemoButton component.
+ */
 interface DemoButtonProps {
+    /** The Tldraw editor instance. */
     editor: Editor
 }
 
+/**
+ * DemoButton Component.
+ * Provides a dropdown menu to select and generate pre-defined demo diagrams.
+ * Useful for showcasing capabilities without needing voice input or API calls.
+ *
+ * @param props - The props for the component.
+ * @returns The rendered DemoButton component.
+ */
 export default function DemoButton({ editor }: DemoButtonProps) {
     const [selectedDemo, setSelectedDemo] = useState<string>('AWS Architecture')
     const [isOpen, setIsOpen] = useState(false)
 
+    /**
+     * Handles the generation of the selected demo diagram.
+     */
     const handleGenerateDemo = () => {
         const diagramData = MOCK_DIAGRAMS[selectedDemo as keyof typeof MOCK_DIAGRAMS]
 

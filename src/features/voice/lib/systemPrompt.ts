@@ -1,6 +1,7 @@
 /**
- * System Prompt pour OpenAI Realtime API
- * Conforme à SPECIFICATIONS.md
+ * System Prompt for OpenAI Realtime API.
+ * Defines the persona, rules, and output format for the AI.
+ * Conform to SPECIFICATIONS.md
  */
 
 export const SYSTEM_PROMPT = `

@@ -1,241 +1,239 @@
 # 🎨 Draw by Voice
 
-> Générez des diagrammes d'architecture logicielle par commande vocale grâce à l'IA
+> Generate software architecture diagrams by voice command using AI
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.0-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.2-blue?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![OpenAI](https://img.shields.io/badge/OpenAI-Realtime%20API-green?logo=openai)](https://platform.openai.com/docs/)
 
-**Draw by Voice** est une application web innovante qui transforme vos descriptions vocales en diagrammes d'architecture professionnels. Parlez naturellement, l'IA comprend et génère automatiquement des schémas clairs et organisés.
+**Draw by Voice** is an innovative web application that transforms your voice descriptions into professional architecture diagrams. Speak naturally, and the AI understands and automatically generates clear and organized schemas.
 
 ![Demo](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=Demo+Screenshot)
 
 ---
 
-## ✨ Fonctionnalités Principales
+## ✨ Key Features
 
-### 🎤 Contrôle Vocal Intelligent
-- **Conversation naturelle** avec l'IA via OpenAI Realtime API
-- **Détection automatique** de fin de phrase (Voice Activity Detection)
-- **Audio bidirectionnel** : Entendez l'IA vous répondre
-- **Streaming temps réel** : Interaction fluide et instantanée
+### 🎤 Intelligent Voice Control
+- **Natural Conversation** with AI via OpenAI Realtime API.
+- **Automatic Voice Activity Detection (VAD)**.
+- **Bidirectional Audio**: Hear the AI respond to you.
+- **Real-time Streaming**: Fluid and instant interaction.
 
-### 🎨 Génération de Diagrammes
-- **Auto-layout** : Organisation automatique avec Dagre
-- **Types de nœuds** : User, Server, Database, Decision, Step
-- **Icônes Universelles** : Intégration **Iconify** (200k+ icônes) + Logo Detection
-- **Support Français** : Interaction et génération 100% en français
-- **Explications textuelles** : Résumé markdown affiché sur le canvas
+### 🎨 Diagram Generation
+- **Auto-layout**: Automatic organization using Dagre.
+- **Node Types**: User, Server, Database, Decision, Step, and more.
+- **Universal Icons**: Integration with **Iconify** (200k+ icons) + Logo Detection.
+- **Language Support**: French interaction and generation (configurable).
+- **Textual Explanations**: Markdown summary displayed on the canvas.
 
-### 🛡️ Sécurité & Robustesse
-- **Validation Zod** : Schémas stricts pour toutes les données
-- **Clé API serveur-only** : Aucune exposition côté client
-- **Messages d'erreur conviviaux** : Pas de crash, feedback clair
-- **TypeScript strict mode** : Zéro erreur implicite `any`
+### 🛡️ Security & Robustness
+- **Zod Validation**: Strict schemas for all data.
+- **Server-Side API Key**: No exposure on the client side.
+- **User-Friendly Error Messages**: No crashes, clear feedback.
+- **TypeScript Strict Mode**: Zero implicit `any` errors.
 
-### 🎯 Canvas Professionnel  
-- **tldraw SDK** : Canvas infini, zoom, pan, sélection
-- **Export** : PNG, SVG, JSON
-- **Mode démo** : Exemples pré-configurés (AWS, Login Flow, CI/CD)
+### 🎯 Professional Canvas
+- **tldraw SDK**: Infinite canvas, zoom, pan, selection.
+- **Export**: PNG, SVG, JSON.
+- **Demo Mode**: Pre-configured examples (AWS, Login Flow, CI/CD).
 
 ---
 
-## 🚀 Démarrage Rapide
+## 🚀 Quick Start
 
-### Prérequis
+### Prerequisites
 
-- Node.js 20+ 
-- npm ou pnpm
-- Clé API OpenAI ([obtenir une clé](https://platform.openai.com/api-keys))
+- Node.js 20+
+- npm or pnpm
+- OpenAI API Key ([get a key](https://platform.openai.com/api-keys))
 
 ### Installation
 
 ```bash
-# Cloner le dépôt
+# Clone the repository
 git clone https://github.com/your-username/draw-by-voice.git
 cd draw-by-voice
 
-# Installer les dépendances
+# Install dependencies
 npm install
 
-# Configurer les variables d'environnement
+# Configure environment variables
 cp .env.local.example .env.local
-# Éditer .env.local et ajouter votre OPENAI_API_KEY
+# Edit .env.local and add your OPENAI_API_KEY
 
-# Lancer le serveur de développement
+# Start the development server
 npm run dev
 ```
 
-Ouvrez [http://localhost:3000](http://localhost:3000) dans votre navigateur.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Configuration
 
-**`.env.local`** :
+**`.env.local`**:
 ```bash
-# IMPORTANT: Utiliser OPENAI_API_KEY (pas NEXT_PUBLIC_*)
+# IMPORTANT: Use OPENAI_API_KEY (not NEXT_PUBLIC_*)
 OPENAI_API_KEY=sk-proj-...
 ```
 
 > [!WARNING]
-> Ne jamais utiliser `NEXT_PUBLIC_OPENAI_API_KEY` car cela exposerait votre clé côté client !
+> Never use `NEXT_PUBLIC_OPENAI_API_KEY` as it would expose your key to the client side!
 
 ---
 
-## 📖 Guide d'Utilisation
+## 📖 Usage Guide
 
-### 1️⃣ Connexion Vocale
+### 1️⃣ Voice Connection
 
-1. Cliquez sur le bouton **"Micro"** (coin inférieur droit)
-2. Autorisez l'accès au microphone
-3. Attendez la connexion (bouton devient bleu)
-4. Cliquez sur **"Parler"** pour commencer
+1. Click the **"Mic"** button (bottom right corner).
+2. Allow microphone access.
+3. Wait for connection (button turns blue).
+4. Click **"Speak"** to start.
 
-### 2️⃣ Générer un Diagramme
+### 2️⃣ Generate a Diagram
 
-**Exemple de commande vocale** :
-> "Crée un diagramme avec un utilisateur qui appelle une API, l'API interroge une base de données, puis renvoie les résultats à l'utilisateur."
+**Example Voice Command**:
+> "Create a diagram with a user calling an API, the API queries a database, and then returns the results to the user."
 
-**L'IA va** :
-- ✅ Comprendre votre description
-- ✅ Générer le schéma (nodes + edges)
-- ✅ Afficher sur le canvas avec auto-layout
-- ✅ Ajouter une explication textuelle
-- ✅ Vous répondre vocalement
-104: 
+**The AI will**:
+- ✅ Understand your description.
+- ✅ Generate the schema (nodes + edges).
+- ✅ Display on the canvas with auto-layout.
+- ✅ Add a textual explanation.
+- ✅ Respond vocally.
 
-### 3️⃣ Optimisation (Coûts & Session)
-Utiliser le bouton **"POUBELLE / RESET"** pour :
-- Effacer le canvas
-- **Réinitialiser le contexte IA** (Saves Tokens & $$$)
-- Démarrer une nouvelle conversation "fraîche"
+### 3️⃣ Optimization (Costs & Session)
+Use the **"TRASH / RESET"** button to:
+- Clear the canvas.
+- **Reset AI context** (Saves Tokens & $$$).
+- Start a fresh conversation.
 
-### 4️⃣ Modes de Développement
-- **Mock Data** : Test sans API (fichier `lib/mockData.ts`) via E2E tests
+### 4️⃣ Development Modes
+- **Mock Data**: Test without API (`lib/mockData.ts`) via E2E tests.
 
 ---
 
-## 🏗️ Architecture Technique
+## 🏗️ Technical Architecture
 
-### Stack Technologique
+### Technology Stack
 
-| Couche | Technologies |
-|--------|-------------|
+| Layer | Technologies |
+|-------|--------------|
 | **Frontend** | Next.js 16 (App Router), React 19, TypeScript 5 |
 | **Styling** | Tailwind CSS 4 |
 | **Canvas** | tldraw SDK 4.2 |
-| **IA** | OpenAI Realtime API (WebSocket) |
-| **Layout** | Dagre (auto-layout graphe) |
+| **AI** | OpenAI Realtime API (WebSocket) |
+| **Layout** | Dagre (graph auto-layout) |
 | **Validation** | Zod 4.1 |
 | **Audio** | Web Audio API (PCM16, 24kHz) |
 
-### Architecture en Couches (Hooks)
+### Layered Architecture (Hooks)
 
 ```
 ┌─────────────────────────────────────┐
-│      useDiagramAgent.ts             │  ← Orchestration métier
-│  (Business Logic Layer)             │
+│      useDiagramAgent.ts             │  ← Business Logic Layer
+│  (Orchestration)                    │
 ├─────────────────────────────────────┤
-│  useRealtimeConnection.ts           │  ← Gestion WebSocket
+│  useRealtimeConnection.ts           │  ← WebSocket Management
 │  (Connection Layer)                 │
 ├─────────────────────────────────────┤
 │  useAudioRecorder.ts                │  ← Microphone + PCM16
-│  useAudioPlayer.ts                  │  ← Lecture audio IA
+│  useAudioPlayer.ts                  │  ← AI Audio Playback
 │  (Audio Layer)                      │
 └─────────────────────────────────────┘
 ```
 
-**Pattern** : **Separation of Concerns**
-- Chaque hook a une **responsabilité unique**
-- **Composabilité** : `useDiagramAgent` orchestre les autres
-- **Testabilité** : Chaque couche peut être testée indépendamment
+**Pattern**: **Separation of Concerns**
+- Each hook has a **single responsibility**.
+- **Composability**: `useDiagramAgent` orchestrates others.
+- **Testability**: Each layer can be tested independently.
 
 ---
 
-##  📂 Structure du Projet
+## 📂 Project Structure
 
 ```
 draw-by-voice/
-├── src/                              # 🆕 Tout le code source
+├── src/                              # 🆕 All source code
 │   ├── app/                          # Next.js App Router
-│   │   ├── page.tsx                  # Page principale avec tldraw
-│   │   ├── layout.tsx                # Layout global
-│   │   ├── globals.css               # Styles globaux
+│   │   ├── page.tsx                  # Main page with tldraw
+│   │   ├── layout.tsx                # Global layout
+│   │   ├── globals.css               # Global styles
 │   │   └── api/
 │   │       └── realtime/
 │   │           └── session/
-│   │               └── route.ts      # API Route (session ephemeral)
+│   │               └── route.ts      # API Route (ephemeral session)
 │   │
-│   ├── features/                     # 🎯 Organisation par domaine métier
-│   │   ├── diagram/                  # Feature: Génération de diagrammes
-│   │   │   ├── components/           # TldrawCanvas, AutoLayoutButton, DemoButton, TestButton
+│   ├── features/                     # 🎯 Domain-based organization
+│   │   ├── diagram/                  # Feature: Diagram Generation
+│   │   │   ├── components/           # TldrawCanvas, AutoLayoutButton, etc.
 │   │   │   ├── hooks/                # useDiagramAgent
-│   │   │   ├── lib/                  # diagramGenerator, autoLayout, nodeTypeMapping, mockData
-│   │   │   └── index.ts              # Exports publics
+│   │   │   ├── lib/                  # diagramGenerator, autoLayout, nodeTypeMapping
+│   │   │   └── index.ts              # Public exports
 │   │   │
-│   │   └── voice/                    # Feature: Contrôle vocal
+│   │   └── voice/                    # Feature: Voice Control
 │   │       ├── components/           # VoiceControl
 │   │       ├── hooks/                # useRealtimeConnection, useAudioRecorder, useAudioPlayer
 │   │       ├── lib/                  # functionDefinitions, systemPrompt
-│   │       └── index.ts              # Exports publics
+│   │       └── index.ts              # Public exports
 │   │
-│   ├── shared/                       # Code partagé entre features
+│   ├── shared/                       # Shared code between features
 │   │   ├── lib/
 │   │   │   └── validation/
-│   │   │       └── schemas.ts        # 🛡️ Schémas Zod
-│   │   ├── types/                    # Types TypeScript centralisés
+│   │   │       └── schemas.ts        # 🛡️ Zod Schemas
+│   │   ├── types/                    # Centralized TypeScript types
 │   │   │   └── index.ts
-│   │   └── index.ts                  # Exports publics
+│   │   └── index.ts                  # Public exports
 │   │
-│   └── config/                       # Configuration centralisée
-│       ├── env.ts                    # Validation variables d'environnement
-│       └── site.ts                   # Métadonnées du site
+│   └── config/                       # Centralized configuration
+│       ├── env.ts                    # Environment variables validation
+│       └── site.ts                   # Site metadata
 │
 ├── docs/                             # 📚 Documentation
 │   ├── architecture/
-│   │   └── ARCHITECTURE.md           # Documentation technique
+│   │   └── ARCHITECTURE.md           # Technical documentation
 │   ├── guides/
 │   │   ├── LOCAL_SETUP.md
 │   │   └── CONTRIBUTING.md
 │   ├── specs/
 │   │   └── SPECIFICATIONS.md
-│   └── media/                        # Ressources média
+│   └── media/                        # Media resources
 │
-├── public/                           # Assets statiques
-├── .env.local.example                # Template variables d'env
+├── public/                           # Static assets
+├── .env.local.example                # Env vars template
 ├── package.json
-├── tsconfig.json                     # Config TypeScript (strict mode + path aliases)
-└── README.md                         # 👈 Vous êtes ici
+├── tsconfig.json                     # TypeScript config
+└── README.md                         # 👈 You are here
 ```
 
-**Avantages de cette structure** :
-- ✅ **Feature-Based** : Tout le code d'une feature est colocalisé
-- ✅ **Scalability** : Facile d'ajouter de nouvelles features
-- ✅ **Boundaries** : Dépendances claires entre modules
-- ✅ **Testability** : Chaque feature peut être testée isolément
-
+**Benefits of this structure**:
+- ✅ **Feature-Based**: Code related to a feature is colocated.
+- ✅ **Scalability**: Easy to add new features.
+- ✅ **Boundaries**: Clear dependencies between modules.
+- ✅ **Testability**: Each feature can be tested in isolation.
 
 ---
 
-## 🔐 Sécurité
+## 🔐 Security
 
-### Protection de la Clé API
+### API Key Protection
 
-✅ **Bonne pratique** :
+✅ **Best Practice**:
 ```typescript
-// ✅ Route API (serveur)
+// ✅ API Route (Server)
 const apiKey = process.env.OPENAI_API_KEY
 ```
 
-❌ **À éviter** :
+❌ **Avoid**:
 ```typescript
-// ❌ Ne JAMAIS faire ça !
+// ❌ NEVER DO THIS!
 const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY
 ```
 
-### Validation des Données
+### Data Validation
 
-Toutes les données de l'IA sont validées avec **Zod** :
+All AI data is validated with **Zod**:
 
 ```typescript
 // lib/schemas.ts
@@ -248,69 +246,58 @@ export const DiagramDataSchema = z.object({
 // hooks/useDiagramAgent.ts
 const result = DiagramDataSchema.safeParse(data)
 if (!result.success) {
-    // Message convivial pour l'utilisateur
-    setError("L'IA a généré des données invalides...")
+    // User-friendly error message
+    setError("The AI generated invalid data...")
     return
 }
 ```
 
 ---
 
-## 🧪 Développement
+## 🧪 Development
 
-### Scripts Disponibles
+### Available Scripts
 
 ```bash
-npm run dev      # Serveur de développement (http://localhost:3000)
-npm run build    # Build production
-npm run start    # Serveur production
-npm run lint     # Linter ESLint
-npx tsc --noEmit # Vérification TypeScript
+npm run dev      # Development server (http://localhost:3000)
+npm run build    # Production build
+npm run start    # Production server
+npm run lint     # ESLint linter
+npx tsc --noEmit # TypeScript check
 ```
 
-### Tests Manuels
+### Manual Tests
 
-1. **Connexion WebSocket** : Vérifier "✅ Connected to OpenAI" dans la console
-2. **Audio Input** : Parler et voir les transcriptions dans les logs
-3. **Audio Output** : Entendre l'IA répondre vocalement
-4. **Génération Diagramme** : Dicter et vérifier l'affichage sur canvas
-5. **Validation** : Tester avec données invalides (message d'erreur convivial)
-
-### Debug
-
-**Logs développement** : Tous les `console.log` sont enveloppés dans :
-```typescript
-if (process.env.NODE_ENV === 'development') {
-    console.log('...')
-}
-```
-
-**Environnement production** : Aucun log console.
+1. **WebSocket Connection**: Verify "✅ Connected to OpenAI" in console.
+2. **Audio Input**: Speak and see transcriptions in logs.
+3. **Audio Output**: Hear the AI respond vocally.
+4. **Diagram Generation**: Dictate and verify canvas rendering.
+5. **Validation**: Test with invalid data (friendly error message).
 
 ---
 
-## 🔧 Configuration Avancée
+## 🔧 Advanced Configuration
 
-### Modifier le Modèle IA
+### Modify AI Model
 
-**`lib/systemPrompt.ts`** :
+**`lib/systemPrompt.ts`**:
 ```typescript
 export const SYSTEM_PROMPT = `
-Tu es un expert en architecture logicielle...
+You are a software architecture expert...
 `
 ```
 
-### Ajouter un Type de Nœud
+### Add a Node Type
 
-1. **`lib/schemas.ts`** : Ajouter dans `NodeTypeSchema`
+1. **`lib/schemas.ts`**: Add to `NodeTypeSchema`
 ```typescript
 export const NodeTypeSchema = z.enum([
     'user', 'server', 'database', 'decision', 'step', 
-    'cache' // 👈 Nouveau type
+    'cache' // 👈 New type
 ])
 ```
 
-2. **`lib/nodeTypeMapping.ts`** : Configurer l'apparence
+2. **`lib/nodeTypeMapping.ts`**: Configure appearance
 ```typescript
 cache: {
     color: 'orange',
@@ -321,10 +308,10 @@ cache: {
 
 ---
 
-## 📚 Documentation Complémentaire
+## 📚 Additional Documentation
 
-- [Guide d'installation détaillé](./LOCAL_SETUP.md)
-- [Spécifications techniques](./SPECIFICATIONS.md)
+- [Detailed Installation Guide](./docs/guides/LOCAL_SETUP.md)
+- [Technical Specifications](./docs/specs/SPECIFICATIONS.md)
 - [OpenAI Realtime API Docs](https://platform.openai.com/docs/guides/realtime)
 - [tldraw SDK Docs](https://tldraw.dev)
 
@@ -332,58 +319,58 @@ cache: {
 
 ## 🤝 Contribution
 
-Les contributions sont les bienvenues ! Pour proposer des améliorations :
+Contributions are welcome! To propose improvements:
 
-1. **Fork** le projet
-2. Créez une **branche feature** (`git checkout -b feature/AmazingFeature`)
-3. **Commit** vos changements (`git commit -m 'Add AmazingFeature'`)
-4. **Push** vers la branche (`git push origin feature/AmazingFeature`)
-5. Ouvrez une **Pull Request**
+1. **Fork** the project.
+2. Create a **feature branch** (`git checkout -b feature/AmazingFeature`).
+3. **Commit** your changes (`git commit -m 'Add AmazingFeature'`).
+4. **Push** to the branch (`git push origin feature/AmazingFeature`).
+5. Open a **Pull Request**.
 
-### Checklist Avant PR
+### Pre-PR Checklist
 
-- [ ] TypeScript compile sans erreur (`npx tsc --noEmit`)
-- [ ] Build réussit (`npm run build`)
-- [ ] Lint passe (`npm run lint`)
-- [ ] Code documenté (JSDoc)
-- [ ] Tests manuels effectués
+- [ ] TypeScript compiles without errors (`npx tsc --noEmit`)
+- [ ] Build succeeds (`npm run build`)
+- [ ] Lint passes (`npm run lint`)
+- [ ] Code documented (JSDoc)
+- [ ] Manual tests performed
 
 ---
 
 ## 📝 Roadmap
 
-- [ ] Support multi-langues (i18n)
+- [ ] Multi-language support (i18n)
 - [ ] Export PDF/PowerPoint
-- [ ] Collaboration temps réel (multi-utilisateurs)
-- [ ] Historique / Undo / Redo
-- [ ] Templates de diagrammes
-- [ ] Mode sombre
-- [ ] Sauvegarde cloud
+- [ ] Real-time collaboration (multi-user)
+- [ ] History / Undo / Redo
+- [ ] Diagram templates
+- [ ] Dark mode
+- [ ] Cloud save
 
 ---
 
-## 📄 Licence
+## 📄 License
 
-Ce projet est sous licence **MIT**. Voir [LICENSE](./LICENSE) pour plus de détails.
+This project is licensed under the **MIT** License. See [LICENSE](./LICENSE) for details.
 
 ---
 
-## 🙏 Remerciements
+## 🙏 Acknowledgements
 
-- [OpenAI](https://openai.com/) pour l'API Realtime
-- [tldraw](https://tldraw.com/) pour leur excellent SDK
-- [Dagre](https://github.com/dagrejs/dagre) pour l'algorithme de layout
-- [Vercel](https://vercel.com/) pour le hosting Next.js
+- [OpenAI](https://openai.com/) for the Realtime API
+- [tldraw](https://tldraw.com/) for the excellent SDK
+- [Dagre](https://github.com/dagrejs/dagre) for the layout algorithm
+- [Vercel](https://vercel.com/) for Next.js hosting
 
 ---
 
 ## 📧 Contact
 
-- **Auteur** : Aurélien Rodier
-- **GitHub** : [@aurelienrodier](https://github.com/aurelienrodier)
+- **Author**: Aurélien Rodier
+- **GitHub**: [@aurelienrodier](https://github.com/aurelienrodier)
 
 ---
 
 <p align="center">
-  Fait avec ❤️ et 🎤
+  Made with ❤️ and 🎤
 </p>

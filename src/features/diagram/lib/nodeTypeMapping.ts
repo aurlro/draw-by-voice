@@ -1,12 +1,22 @@
 import type { NodeType } from '@shared/types'
 
+/**
+ * Configuration interface for a node type.
+ */
 export interface NodeTypeConfig {
+    /** The color theme for the node. */
     color: string
+    /** The geometric shape of the node. */
     geo: 'rectangle' | 'diamond' | 'ellipse' | 'cloud'
-    iconUrl?: string // Nouveau champ optionnel
+    /** Optional URL for the icon. */
+    iconUrl?: string
+    /** Text color for the label. */
     labelColor?: string
 }
 
+/**
+ * Configuration mapping for all supported node types.
+ */
 export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
     // Direct Tldraw geo shape types
     rectangle: {
@@ -29,17 +39,34 @@ export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
         geo: 'cloud',
         labelColor: 'black'
     },
-    // Types spéciaux pour icônes et acteurs
+    // Special types for icons and actors
     icon: {
         color: 'grey',
         geo: 'rectangle',
         labelColor: 'black'
-        // iconUrl sera déterminé dynamiquement via iconName
+        // iconUrl will be determined dynamically via iconName
     },
     actor: {
         color: 'green',
         geo: 'ellipse',
         iconUrl: 'https://cdn.simpleicons.org/person',
+        labelColor: 'black'
+    },
+    // Entity types (Architecture)
+    person: {
+        color: 'green',
+        geo: 'ellipse',
+        iconUrl: 'https://cdn.simpleicons.org/person',
+        labelColor: 'black'
+    },
+    mobile: {
+        color: 'grey',
+        geo: 'rectangle',
+        labelColor: 'black'
+    },
+    payment: {
+        color: 'orange',
+        geo: 'rectangle',
         labelColor: 'black'
     },
     // Legacy abstract types (mapped to geo shapes)
@@ -72,6 +99,11 @@ export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
     }
 }
 
+/**
+ * Retrieves the configuration for a given node type.
+ * @param type - The node type.
+ * @returns The configuration object for the node type.
+ */
 export function getNodeConfig(type: NodeType): NodeTypeConfig {
     return NODE_TYPE_CONFIG[type] || NODE_TYPE_CONFIG.step
 }

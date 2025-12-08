@@ -1,7 +1,7 @@
 import dagre from 'dagre'
 
 /**
- * Interface pour un nœud à layouter
+ * Interface for a node to be layouted.
  */
 export interface LayoutNode {
     id: string
@@ -10,7 +10,7 @@ export interface LayoutNode {
 }
 
 /**
- * Interface pour une connexion entre nœuds
+ * Interface for a connection between nodes.
  */
 export interface LayoutEdge {
     from: string
@@ -18,7 +18,7 @@ export interface LayoutEdge {
 }
 
 /**
- * Résultat du calcul de layout
+ * Result of the layout calculation.
  */
 export interface LayoutResult {
     nodes: Map<string, { x: number; y: number }>
@@ -27,35 +27,35 @@ export interface LayoutResult {
 }
 
 /**
- * Calcule le layout automatique d'un graphe en utilisant dagre
+ * Calculates the automatic layout of a graph using dagre.
  * 
- * @param nodes - Liste des nœuds avec leurs dimensions
- * @param edges - Liste des connexions entre nœuds
- * @param direction - Direction du graphe ('LR' = Left-to-Right, 'TB' = Top-to-Bottom)
- * @returns Les positions calculées pour chaque nœud et les dimensions totales du graphe
+ * @param nodes - List of nodes with their dimensions.
+ * @param edges - List of connections between nodes.
+ * @param direction - Direction of the graph ('LR' = Left-to-Right, 'TB' = Top-to-Bottom).
+ * @returns The calculated positions for each node and total graph dimensions.
  */
 export function autoLayout(
     nodes: LayoutNode[],
     edges: LayoutEdge[],
     direction: 'LR' | 'TB' = 'TB'
 ): LayoutResult {
-    // Créer un nouveau graphe dagre
+    // Create a new dagre graph
     const g = new dagre.graphlib.Graph()
 
-    // Configurer les paramètres du graphe
+    // Configure graph parameters
     g.setGraph({
-        rankdir: direction,     // Top-to-Bottom (flux naturel)
-        ranksep: 150,           // Espace VERTICAL (entre les étages) -> Augmenté pour laisser place aux labels
-        nodesep: 100,           // Espace HORIZONTAL (entre les branches) -> Augmenté pour éviter le chevauchement
-        edgesep: 50,            // Espace entre les liens
+        rankdir: direction,     // Top-to-Bottom (natural flow)
+        ranksep: 150,           // VERTICAL spacing (between ranks) -> Increased for labels
+        nodesep: 100,           // HORIZONTAL spacing (between branches) -> Increased to avoid overlap
+        edgesep: 50,            // Spacing between edges
         marginx: 50,
         marginy: 50,
     })
 
-    // Label par défaut pour les arêtes
+    // Default edge label
     g.setDefaultEdgeLabel(() => ({}))
 
-    // Ajouter tous les nœuds au graphe
+    // Add all nodes to the graph
     nodes.forEach((node) => {
         g.setNode(node.id, {
             width: node.width,
@@ -63,21 +63,21 @@ export function autoLayout(
         })
     })
 
-    // Ajouter toutes les arêtes au graphe
+    // Add all edges to the graph
     edges.forEach((edge) => {
         g.setEdge(edge.from, edge.to)
     })
 
-    // Calculer le layout
+    // Calculate layout
     dagre.layout(g)
 
-    // Extraire les positions calculées
+    // Extract calculated positions
     const positions = new Map<string, { x: number; y: number }>()
 
     nodes.forEach((node) => {
         const dagreNode = g.node(node.id)
         if (dagreNode) {
-            // dagre retourne le centre du nœud, on convertit pour avoir le coin supérieur gauche
+            // dagre returns node center, convert to top-left corner
             positions.set(node.id, {
                 x: dagreNode.x - node.width / 2,
                 y: dagreNode.y - node.height / 2,
@@ -85,7 +85,7 @@ export function autoLayout(
         }
     })
 
-    // Calculer les dimensions totales du graphe
+    // Calculate total graph dimensions
     const graphInfo = g.graph()
 
     return {

@@ -3,47 +3,60 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 
 /**
- * État de la connexion Realtime
+ * State of the Realtime Connection.
  */
 export interface RealtimeConnectionState {
+    /** Indicates if the WebSocket connection is established. */
     isConnected: boolean
+    /** Indicates if the connection is currently being established. */
     isConnecting: boolean
+    /** Contains the error message if a connection error occurred, otherwise null. */
     error: string | null
+    /** List of recent events received from the WebSocket. */
     events: unknown[]
 }
 
 /**
- * Configuration de la session OpenAI Realtime
+ * Configuration for the OpenAI Realtime Session.
  */
 export interface RealtimeSessionConfig {
+    /** System instructions for the model. */
     instructions: string
+    /** List of tools available to the model. */
     tools: unknown[]
+    /** Modalities to use (e.g., audio, text). */
     modalities?: string[]
+    /** Input audio format (e.g., pcm16). */
     input_audio_format?: string
+    /** Output audio format (e.g., pcm16). */
     output_audio_format?: string
+    /** Turn detection configuration. */
     turn_detection?: { type: string }
+    /** Tool choice configuration (e.g., auto). */
     tool_choice?: string
 }
 
 /**
- * Props pour le hook useRealtimeConnection
+ * Props for the useRealtimeConnection hook.
  */
 export interface UseRealtimeConnectionProps {
+    /** Configuration for the session. */
     sessionConfig?: RealtimeSessionConfig
+    /** Callback function triggered when an error occurs. */
     onError?: (error: string) => void
 }
 
 /**
- * Hook pour gérer la connexion WebSocket avec OpenAI Realtime API
+ * Hook to manage WebSocket connection with OpenAI Realtime API.
  * 
- * Responsabilité: Pure gestion de connexion WebSocket
- * - Obtenir un token ephemeral
- * - Établir la connexion WebSocket
- * - Envoyer/recevoir des messages
- * - Gérer les erreurs de connexion
+ * Responsibility: Pure WebSocket connection management.
+ * - Obtain an ephemeral token.
+ * - Establish the WebSocket connection.
+ * - Send/receive messages.
+ * - Handle connection errors.
  * 
- * @param props - Configuration du hook
- * @returns État et méthodes de contrôle de la connexion
+ * @param props - Configuration for the hook.
+ * @returns State and methods to control the connection.
  */
 export function useRealtimeConnection({
     sessionConfig,
@@ -60,7 +73,8 @@ export function useRealtimeConnection({
     const messageHandlersRef = useRef<Set<(message: unknown) => void>>(new Set())
 
     /**
-     * Envoie un message au WebSocket
+     * Sends a message to the WebSocket.
+     * @param message - The message object to send.
      */
     const sendMessage = useCallback((message: object) => {
         if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -73,19 +87,22 @@ export function useRealtimeConnection({
     }, [])
 
     /**
-     * Abonne un handler aux messages reçus
+     * Subscribes a handler to received messages.
+     * @param handler - The function to call when a message is received.
+     * @returns A cleanup function to unsubscribe the handler.
      */
     const onMessage = useCallback((handler: (message: unknown) => void) => {
         messageHandlersRef.current.add(handler)
 
-        // Retourner une fonction de cleanup
+        // Return a cleanup function
         return () => {
             messageHandlersRef.current.delete(handler)
         }
     }, [])
 
     /**
-     * Notifie tous les handlers d'un nouveau message
+     * Notifies all subscribed handlers of a new message.
+     * @param message - The received message.
      */
     const notifyMessageHandlers = useCallback((message: unknown) => {
         messageHandlersRef.current.forEach(handler => {
@@ -100,13 +117,13 @@ export function useRealtimeConnection({
     }, [])
 
     /**
-     * Connecte au WebSocket OpenAI Realtime API
+     * Connects to the OpenAI Realtime API WebSocket.
      */
     const connect = useCallback(async () => {
         try {
             setState(prev => ({ ...prev, isConnecting: true, error: null }))
 
-            // Étape 1: Obtenir un token ephemeral depuis notre backend
+            // Step 1: Obtain an ephemeral token from our backend
             if (process.env.NODE_ENV === 'development') {
                 console.log('🔑 Requesting ephemeral session from backend...')
             }
@@ -122,12 +139,12 @@ export function useRealtimeConnection({
                 console.log('✅ Ephemeral session created')
             }
 
-            // Étape 2: Connecter au WebSocket avec le token dans l'URL
+            // Step 2: Connect to the WebSocket with the token in the URL
             const url = `wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-12-17`
 
-            // Créer la promesse de connexion
+            // Create connection promise
             await new Promise<void>((resolve, reject) => {
-                // Créer la connexion WebSocket avec le token dans les sous-protocoles
+                // Create WebSocket connection with token in subprotocols
                 const ws = new WebSocket(url, [
                     'realtime',
                     `openai-insecure-api-key.${ephemeralKey}`,
@@ -135,14 +152,14 @@ export function useRealtimeConnection({
                 ])
                 wsRef.current = ws
 
-                // Event: Connexion ouverte
+                // Event: Connection open
                 ws.onopen = () => {
                     if (process.env.NODE_ENV === 'development') {
                         console.log('✅ Connected to OpenAI')
                     }
                     setState(prev => ({ ...prev, isConnected: true, isConnecting: false, error: null }))
 
-                    // Configurer la session si fournie
+                    // Configure session if provided
                     if (sessionConfig) {
                         ws.send(JSON.stringify({
                             type: 'session.update',
@@ -155,11 +172,11 @@ export function useRealtimeConnection({
                     resolve()
                 }
 
-                // Event: Message reçu
+                // Event: Message received
                 ws.onmessage = (e) => {
                     const msg = JSON.parse(e.data)
 
-                    // Log pour debug en développement
+                    // Log for debug in development
                     if (process.env.NODE_ENV === 'development') {
                         if (msg.type === 'response.audio_transcript.delta') {
                             console.log('📝 AI Speech:', msg.delta)
@@ -169,22 +186,22 @@ export function useRealtimeConnection({
                         }
                     }
 
-                    // Notifier tous les handlers abonnés
+                    // Notify all subscribed handlers
                     notifyMessageHandlers(msg)
 
-                    // Ajouter aux events (garder les 50 derniers)
+                    // Add to events (keep last 50)
                     setState(prev => ({
                         ...prev,
                         events: [msg, ...prev.events].slice(0, 50)
                     }))
                 }
 
-                // Event: Erreur
+                // Event: Error
                 ws.onerror = (error) => {
                     if (process.env.NODE_ENV === 'development') {
                         console.error('❌ WebSocket error:', error)
                     }
-                    const errorMsg = 'Erreur de connexion WebSocket'
+                    const errorMsg = 'WebSocket connection error'
                     setState((prev) => ({ ...prev, error: errorMsg, isConnecting: false }))
                     onError?.(errorMsg)
                     if (ws.readyState === WebSocket.CONNECTING) {
@@ -192,7 +209,7 @@ export function useRealtimeConnection({
                     }
                 }
 
-                // Event: Fermeture
+                // Event: Close
                 ws.onclose = () => {
                     if (process.env.NODE_ENV === 'development') {
                         console.log('🔌 WebSocket disconnected')
@@ -204,7 +221,7 @@ export function useRealtimeConnection({
             if (process.env.NODE_ENV === 'development') {
                 console.error('Connection error:', err)
             }
-            const errorMsg = err instanceof Error ? err.message : 'Erreur de connexion'
+            const errorMsg = err instanceof Error ? err.message : 'Connection error'
             setState((prev) => ({ ...prev, error: errorMsg, isConnecting: false }))
             onError?.(errorMsg)
             throw err
@@ -212,7 +229,7 @@ export function useRealtimeConnection({
     }, [sessionConfig, onError, notifyMessageHandlers])
 
     /**
-     * Déconnecte du WebSocket
+     * Disconnects from the WebSocket.
      */
     const disconnect = useCallback(() => {
         if (wsRef.current) {
@@ -223,7 +240,7 @@ export function useRealtimeConnection({
     }, [])
 
     /**
-     * Cleanup à la destruction du composant
+     * Cleanup on component unmount.
      */
     useEffect(() => {
         return () => {

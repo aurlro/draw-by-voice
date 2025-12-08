@@ -9,7 +9,7 @@ const ANIMATION_DELAY_MS = 250
 const TEXT_STREAM_SPEED_MS = 20
 
 /**
- * Orchestrateur pour l'animation de la création du diagramme
+ * Orchestrator for diagram creation animation.
  */
 export class DiagramAnimator {
     private editor: Editor
@@ -21,7 +21,9 @@ export class DiagramAnimator {
     }
 
     /**
-     * Anime la génération du diagramme
+     * Animates the generation of the diagram.
+     * @param data - The diagram data.
+     * @param explanation - Optional explanation text.
      */
     async animate(data: DiagramData, explanation: string = '') {
         if (this.isAnimating) {
@@ -32,12 +34,12 @@ export class DiagramAnimator {
         this.abortController = new AbortController()
 
         try {
-            // Configuration du style
+            // Style configuration
             this.editor.setStyleForNextShapes(DefaultFontStyle, 'sans')
             this.editor.setStyleForNextShapes(DefaultDashStyle, 'solid')
             this.editor.setStyleForNextShapes(DefaultSizeStyle, 'm')
 
-            // 1. Calcul du Layout (identique à diagramGenerator)
+            // 1. Calculate Layout (identical to diagramGenerator)
             const layoutNodes: LayoutNode[] = data.nodes.map((node) => ({
                 id: node.id,
                 width: DEFAULT_NODE_WIDTH,
@@ -51,28 +53,29 @@ export class DiagramAnimator {
 
             const layout = autoLayout(layoutNodes, layoutEdges, 'LR')
 
-            // 2. Création progressive des nœuds
+            // 2. Progressive creation of nodes
             for (const node of data.nodes) {
-                if (this.abortController.signal.aborted) break
+                if (this.abortController?.signal.aborted) break
 
                 const layoutPos = layout.nodes.get(node.id)
                 const x = node.x || layoutPos?.x || 0
                 const y = node.y || layoutPos?.y || 0
 
-                // Créer le nœud
-                const shapeId = await this.createNodeAnimated(node as any, x, y)
+                // Create node
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await this.createNodeAnimated(node as any, x, y) // Removed unused shapeId
 
-                // Attendre un peu avant le prochain
+                // Wait a bit before the next one
                 await this.wait(ANIMATION_DELAY_MS)
             }
 
-            // 3. Création des liens (tous d'un coup ou animés aussi ? Disons groupés pour l'instant)
-            if (!this.abortController.signal.aborted) {
+            // 3. Create edges (grouped for now)
+            if (!this.abortController?.signal.aborted) {
                 this.createEdges(data.edges, layout)
             }
 
-            // 4. Ajouter l'explication (streaming)
-            if (explanation && !this.abortController.signal.aborted) {
+            // 4. Add explanation (streaming)
+            if (explanation && !this.abortController?.signal.aborted) {
                 await this.wait(500)
                 await this.streamExplanation(explanation, (layout.width || 0) + 50)
             }
@@ -88,36 +91,37 @@ export class DiagramAnimator {
     }
 
     /**
-     * Crée un nœud avec animation de texte
+     * Creates a node with text animation.
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async createNodeAnimated(node: any, x: number, y: number): Promise<TLShapeId> {
-        // Validation et formatage de l'ID Tldraw (doit commencer par 'shape:')
+        // Validation and formatting of Tldraw ID (must start with 'shape:')
         let shapeId: TLShapeId
         if (typeof node.id === 'string' && node.id.startsWith('shape:')) {
             shapeId = node.id as TLShapeId
         } else if (typeof node.id === 'string') {
-            // Si l'ID est une simple string (ex: 'node-1'), on le préfixe
+            // If ID is a simple string (e.g. 'node-1'), prefix it
             shapeId = `shape:${node.id}` as TLShapeId
         } else {
             // Fallback
             shapeId = createShapeId()
         }
 
-        // Déterminer le type et les props initiales (Universal Rich Node)
-        let type = 'rich-node'
+        // Determine type and initial props (Universal Rich Node)
+        const type = 'rich-node'
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let props: any = {
             w: DEFAULT_NODE_WIDTH,
             h: DEFAULT_NODE_HEIGHT,
-            text: '', // On commence vide pour le streaming
+            text: '', // Start empty for streaming
             nodeType: node.type || 'action',
         }
 
-        // Cas spéciaux: Adapter les props pour RichNodeShape
+        // Special cases: Adapt props for RichNodeShape
         if (node.type === 'icon' && node.iconName) {
             props = {
                 w: 80, h: 80,
-                text: '', // Label séparé ou intégré ? Intégré dans RichNodeShape (voir composant) -> Ah non, RichNodeShape affiche text en bas.
-                // Wait, logic change: RichNodeShape now handles icon display internally if nodeType='icon'
+                text: '', // Label separated or integrated? Integrated in RichNodeShape.
                 nodeType: 'icon',
                 iconName: node.iconName,
             }
@@ -130,7 +134,7 @@ export class DiagramAnimator {
             }
         }
 
-        // Création de la forme initiale
+        // Initial shape creation
         this.editor.createShape({
             id: shapeId,
             type,
@@ -139,19 +143,17 @@ export class DiagramAnimator {
             props,
         })
 
-        // Animation "Streaming Text"
+        // "Streaming Text" animation
         const fullText = node.label || ''
         if (fullText) {
             await this.streamTextToShape(shapeId, fullText)
         }
 
         return shapeId
-
-        return shapeId
     }
 
     /**
-     * Simule l'écriture du texte caractère par caractère
+     * Simulates text writing character by character.
      */
     private async streamTextToShape(shapeId: TLShapeId, fullText: string) {
         for (let i = 1; i <= fullText.length; i++) {
@@ -161,21 +163,24 @@ export class DiagramAnimator {
 
             this.editor.updateShape({
                 id: shapeId,
-                type: this.editor.getShape(shapeId)?.type as any,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                type: (this.editor.getShape(shapeId)?.type as any) || 'rich-node',
                 props: { text: partialText }
             })
 
-            // Variation légère de la vitesse pour effet "humain"
+            // Slight speed variation for "human" effect
             const randomDelay = TEXT_STREAM_SPEED_MS + Math.random() * 10
             await this.wait(randomDelay)
         }
     }
 
     /**
-     * Crée les liens
+     * Creates edges.
      */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private createEdges(edges: any[], layout: any) {
-        edges.forEach((edge) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        edges.forEach((edge: any) => {
             const fromNode = layout.nodes.get(edge.source)
             const toNode = layout.nodes.get(edge.target)
             if (!fromNode || !toNode) return
@@ -192,7 +197,7 @@ export class DiagramAnimator {
     }
 
     /**
-     * Stream l'explication finale
+     * Streams the final explanation.
      */
     private async streamExplanation(text: string, x: number) {
         const id = createShapeId()
@@ -203,9 +208,7 @@ export class DiagramAnimator {
             y: 0,
             props: {
                 w: 300,
-                h: 200, // Hauteur approximative, RichNode n'a pas d'autoSize mais le contenu HTML scrolera ou dépassera si besoin. 
-                // Note: RichNodeShape utilise HTMLContainer, donc le contenu s'adapte mais la hit box est w/h. 
-                // Idéalement on calculerait la taille mais pour l'instant une taille fixe large est OK.
+                h: 200, // Approximate height, RichNode uses HTMLContainer so content adapts
                 text: '',
                 nodeType: 'explanation',
             },
@@ -218,6 +221,9 @@ export class DiagramAnimator {
         return new Promise(resolve => setTimeout(resolve, ms))
     }
 
+    /**
+     * Cancels the current animation.
+     */
     cancel() {
         if (this.abortController) {
             this.abortController.abort()

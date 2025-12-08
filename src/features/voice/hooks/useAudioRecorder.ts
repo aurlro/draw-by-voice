@@ -5,24 +5,26 @@ import type { AudioRecorderRef } from '@shared/types'
 
 
 /**
- * Props pour le hook useAudioRecorder
+ * Props for the useAudioRecorder hook.
  */
 export interface UseAudioRecorderProps {
+    /** Callback function triggered when audio data is available (Base64 encoded). */
     onAudioData?: (base64Audio: string) => void
+    /** Callback function triggered when an error occurs. */
     onError?: (error: string) => void
 }
 
 /**
- * Hook pour gérer l'enregistrement audio et la conversion PCM16
+ * Hook to manage audio recording and PCM16 conversion.
  * 
- * Responsabilité: Gestion du microphone et encodage audio
- * - Demander l'accès au microphone
- * - Capturer l'audio en temps réel
- * - Convertir Float32 -> PCM16 -> Base64
- * - Gérer le cleanup des ressources audio
+ * Responsibility: Microphone management and audio encoding.
+ * - Request microphone access.
+ * - Capture audio in real-time.
+ * - Convert Float32 -> PCM16 -> Base64.
+ * - Handle audio resource cleanup.
  * 
- * @param props - Configuration du hook
- * @returns État et méthodes de contrôle de l'enregistrement
+ * @param props - Configuration for the hook.
+ * @returns State and methods to control recording.
  */
 export function useAudioRecorder({
     onAudioData,
@@ -34,13 +36,14 @@ export function useAudioRecorder({
     const mediaRecorderRef = useRef<AudioRecorderRef | null>(null)
 
     /**
-     * Démarre l'enregistrement audio
+     * Starts audio recording.
      */
     const [audioLevel, setAudioLevel] = useState(0)
     const animationFrameRef = useRef<number>(0)
 
     /**
-     * Analyse le volume audio en temps réel
+     * Analyzes audio volume in real-time.
+     * @param analyser - The AnalyserNode to read data from.
      */
     const analyzeAudio = useCallback((analyser: AnalyserNode) => {
         const dataArray = new Uint8Array(analyser.frequencyBinCount)
@@ -48,20 +51,20 @@ export function useAudioRecorder({
         const updateLevel = () => {
             analyser.getByteFrequencyData(dataArray)
 
-            // Calculer la moyenne du volume
-            // On se concentre sur les basses/moyennes fréquences pour la voix humaine
+            // Calculate average volume
+            // Focus on low/mid frequencies for human voice
             let sum = 0
-            // On prend un sous-ensemble des fréquences (les premières sont souvent les plus pertinentes pour la voix)
+            // Take a subset of frequencies (first ones are often most relevant for voice)
             const length = dataArray.length
             for (let i = 0; i < length; i++) {
                 sum += dataArray[i]
             }
 
             const average = sum / length
-            // Normaliser entre 0 et 1 (255 est le max pour getByteFrequencyData)
+            // Normalize between 0 and 1 (255 is max for getByteFrequencyData)
             const normalized = Math.min(1, average / 128)
 
-            // Lissage pour éviter les sauts trop brusques (optionnel, mais agréable visuellement)
+            // Smoothing to avoid abrupt jumps (optional, but visually pleasing)
             setAudioLevel(prev => prev * 0.8 + normalized * 0.2)
 
             animationFrameRef.current = requestAnimationFrame(updateLevel)
@@ -71,7 +74,7 @@ export function useAudioRecorder({
     }, [])
 
     /**
-     * Arrête l'analyse audio
+     * Stops audio analysis.
      */
     const stopAnalysis = useCallback(() => {
         if (animationFrameRef.current) {
@@ -81,36 +84,36 @@ export function useAudioRecorder({
     }, [])
 
     /**
-     * Démarre l'enregistrement audio
+     * Starts audio recording.
      */
     const startRecording = useCallback(async () => {
         try {
             setError(null)
 
-            // Demander l'accès au microphone
+            // Request microphone access
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    sampleRate: 24000, // OpenAI demande 24kHz
+                    sampleRate: 24000, // OpenAI requires 24kHz
                     channelCount: 1,   // Mono
                     echoCancellation: true,
                     noiseSuppression: true,
                 }
             })
 
-            // Créer un AudioContext à 24kHz
+            // Create AudioContext at 24kHz
             const audioContext = new AudioContext({ sampleRate: 24000 })
             const source = audioContext.createMediaStreamSource(stream)
 
-            // Créer un analyser pour la visualisation
+            // Create analyzer for visualization
             const analyser = audioContext.createAnalyser()
-            analyser.fftSize = 256 // Pas besoin d'une grande précision pour juste le volume
+            analyser.fftSize = 256 // High precision not needed for just volume
             analyser.smoothingTimeConstant = 0.5
             source.connect(analyser)
 
-            // Démarrer l'analyse visuelle
+            // Start visual analysis
             analyzeAudio(analyser)
 
-            // Charger le module AudioWorklet
+            // Load AudioWorklet module
             try {
                 await audioContext.audioWorklet.addModule('/audio-processor.js')
             } catch (e) {
@@ -118,40 +121,40 @@ export function useAudioRecorder({
                 throw new Error('AudioWorklet module loading failed')
             }
 
-            // Créer le noeud Worklet
+            // Create Worklet node
             const workletNode = new AudioWorkletNode(audioContext, 'audio-recorder-processor')
 
             workletNode.port.onmessage = (e) => {
-                const inputData = e.data // Float32Array envoyé par le processor
+                const inputData = e.data // Float32Array sent by processor
 
-                // Convertir Float32Array en Int16Array (PCM16)
+                // Convert Float32Array to Int16Array (PCM16)
                 const pcm16 = new Int16Array(inputData.length)
                 for (let i = 0; i < inputData.length; i++) {
-                    // Convertir de [-1, 1] à [-32768, 32767]
+                    // Convert from [-1, 1] to [-32768, 32767]
                     const s = Math.max(-1, Math.min(1, inputData[i]))
                     pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7FFF
                 }
 
-                // Convertir en base64
-                // Utilisation optimisée de TextEncoder/Decoder ou btoa
-                // Note: btoa sur des chunks binaires en JS est standard ici
+                // Convert to base64
+                // Optimized use of TextEncoder/Decoder or btoa
+                // Note: btoa on binary chunks in JS is standard here
                 const base64Audio = btoa(
                     String.fromCharCode(...new Uint8Array(pcm16.buffer))
                 )
 
-                // Envoyer les données audio
+                // Send audio data
                 onAudioData?.(base64Audio)
             }
 
-            // Connecter le graphe
+            // Connect the graph
             source.connect(workletNode)
             workletNode.connect(audioContext.destination)
 
-            // Stocker les références pour cleanup
+            // Store references for cleanup
             mediaRecorderRef.current = {
                 stream,
                 audioContext,
-                processor: workletNode, // On garde le nom "processor" mais c'est un WorkletNode
+                processor: workletNode, // Kept "processor" name but it's a WorkletNode
                 source,
             }
 
@@ -163,7 +166,7 @@ export function useAudioRecorder({
             if (process.env.NODE_ENV === 'development') {
                 console.error('Recording error:', err)
             }
-            const errorMsg = err instanceof Error ? err.message : 'Impossible d\'accéder au microphone'
+            const errorMsg = err instanceof Error ? err.message : 'Unable to access microphone'
             setError(errorMsg)
             onError?.(errorMsg)
             throw err
@@ -171,7 +174,7 @@ export function useAudioRecorder({
     }, [analyzeAudio, onAudioData, onError])
 
     /**
-     * Arrête l'enregistrement audio
+     * Stops audio recording.
      */
     const stopRecording = useCallback(() => {
         stopAnalysis()
@@ -201,7 +204,7 @@ export function useAudioRecorder({
         }
     }, [stopAnalysis])
 
-    // Cleanup effect pour s'assurer qu'on arrête l'animation frame si le composant est démonté
+    // Cleanup effect to ensure animation frame is stopped if component unmounts
     useEffect(() => {
         return () => {
             if (animationFrameRef.current) {
