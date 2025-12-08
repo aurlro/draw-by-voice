@@ -13,6 +13,10 @@ export const NodeTypeSchema = z.enum([
     // Types spéciaux pour icônes et acteurs
     'icon',    // Logos externes via CDN (AWS, Docker, etc.)
     'actor',   // Acteurs/utilisateurs (stick figure)
+    // Types entités (Architecture)
+    'mobile',
+    'person',
+    'payment',
     // Anciens types abstraits, conservés pour compatibilité
     'user',
     'server',

@@ -34,19 +34,20 @@ import {
 type NodeType = 'action' | 'decision' | 'input' | 'process' | 'database' | 'start' | 'end' | 'person' | 'system' | 'step'
 
 // Mapping des types vers les icônes Lucide
-action: Zap,
+const ICON_MAP: Record<string, React.ElementType> = {
+    action: Zap,
     decision: CircleHelp,
-        input: FileText,
-            process: Activity,
-                database: Database,
-                    start: MousePointer2,
-                        end: Hexagon,
-                            person: User,
-                                system: Settings,
-                                    step: ArrowRight,
-                                        server: Server,
-                                            mobile: Smartphone,
-                                                payment: CreditCard,
+    input: FileText,
+    process: Activity,
+    database: Database,
+    start: MousePointer2,
+    end: Hexagon,
+    person: User,
+    system: Settings,
+    step: ArrowRight,
+    server: Server,
+    mobile: Smartphone,
+    payment: CreditCard,
     default: Layout
 }
 
