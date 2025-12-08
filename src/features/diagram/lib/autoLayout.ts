@@ -45,11 +45,11 @@ export function autoLayout(
     // Configurer les paramètres du graphe
     g.setGraph({
         rankdir: direction,     // Top-to-Bottom (flux naturel)
-        ranksep: 150,           // Espace VERTICAL (entre les étages) -> Augmenté pour laisser place aux labels
-        nodesep: 100,           // Espace HORIZONTAL (entre les branches) -> Augmenté pour éviter le chevauchement
-        edgesep: 50,            // Espace entre les liens
-        marginx: 50,
-        marginy: 50,
+        ranksep: 200,           // Espace VERTICAL (entre les étages) -> Augmenté pour laisser place aux labels
+        nodesep: 150,           // Espace HORIZONTAL (entre les branches) -> Augmenté pour éviter le chevauchement
+        edgesep: 80,            // Espace entre les liens
+        marginx: 100,
+        marginy: 100,
     })
 
     // Label par défaut pour les arêtes

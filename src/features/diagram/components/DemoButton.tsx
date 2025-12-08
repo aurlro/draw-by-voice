@@ -18,13 +18,13 @@ export default function DemoButton({ editor }: DemoButtonProps) {
 
         if (diagramData) {
             console.log('🎭 Generating demo diagram:', selectedDemo)
-            generateDiagram(editor, diagramData, 'LR')
+            generateDiagram(editor, diagramData, diagramData.explanation || '')
             setIsOpen(false)
         }
     }
 
     return (
-        <div className="fixed top-40 right-4 z-50 flex flex-col items-end gap-2">
+        <div className="fixed top-40 left-4 z-50 flex flex-col items-start gap-2">
             {/* Dropdown menu */}
             {isOpen && (
                 <div className="bg-white border border-gray-300 rounded-lg shadow-xl p-2 min-w-[200px]">

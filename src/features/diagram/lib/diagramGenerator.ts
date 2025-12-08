@@ -1,4 +1,6 @@
-import { createShapeId, Editor, DefaultFontStyle, DefaultDashStyle, DefaultSizeStyle } from '@tldraw/tldraw'
+import { createShapeId, Editor, DefaultFontStyle, DefaultDashStyle, DefaultSizeStyle, TLShapeId } from '@tldraw/tldraw'
+// @ts-ignore - toRichText might be missing in type definitions but present in runtime or tldraw package
+import { toRichText } from '@tldraw/tldraw'
 import { autoLayout, LayoutNode, LayoutEdge } from './autoLayout'
 import type { DiagramData } from '@shared/types'
 
@@ -47,7 +49,7 @@ export async function generateDiagram(
 
     // 0. ID Mapping : Table de correspondance ID IA -> ID Tldraw
     // Ceci est crucial pour que les edges retrouvent les bons nodes
-    const idMap = new Map<string, any>(); // Utilise TLShapeId idéalement mais any passe avec createShapeId
+    const idMap = new Map<string, TLShapeId>();
 
     // 2. Setup Caméra (Approximation)
     if (layout.width > 0 && layout.height > 0) {
@@ -68,14 +70,14 @@ export async function generateDiagram(
         const dim = getNodeDimensions(node.type)
 
         // Logique de création de shape
-        let props: any = {
+        let props: Record<string, unknown> = {
             w: dim.w,
             h: dim.h,
             text: node.label,
             nodeType: node.type || 'action',
         };
 
-        let shapeType = 'rich-node';
+        const shapeType = 'rich-node';
 
         // CAS A : C'est une Icône
         if (node.type === 'icon' && node.iconName) {
@@ -98,67 +100,67 @@ export async function generateDiagram(
         await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    // 4. Animation des Liens (Mode Coordonnées - Infaillible)
+    // 4. Animation des Liens (Mode Bindings - Connexions réelles)
     for (const edge of data.edges) {
-        // Retrouver les positions calculées
-        const sPos = layout.nodes.get(edge.source)
-        const tPos = layout.nodes.get(edge.target)
+        // Récupérer les IDs Tldraw des nœuds
+        const sourceShapeId = idMap.get(edge.source)
+        const targetShapeId = idMap.get(edge.target)
 
-        // Retrouver les métadonnées pour les dimensions
-        const sNodeData = data.nodes.find(n => n.id === edge.source)
-        const tNodeData = data.nodes.find(n => n.id === edge.target)
-
-        if (!sPos || !tPos || !sNodeData || !tNodeData) {
-            console.warn(`[DiagramGenerator] Edge ignoré: ${edge.source} -> ${edge.target}`)
+        if (!sourceShapeId || !targetShapeId) {
+            console.warn(`[DiagramGenerator] Edge ignoré: ${edge.source} -> ${edge.target} (IDs introuvables)`)
             continue
         }
 
-        const sDim = getNodeDimensions(sNodeData.type)
-        const tDim = getNodeDimensions(tNodeData.type)
-
-        // Calcul des centres
-        const startX = sPos.x + sDim.w / 2
-        const startY = sPos.y + sDim.h / 2
-        const endX = tPos.x + tDim.w / 2
-        const endY = tPos.y + tDim.h / 2
-
         const arrowId = createShapeId()
 
-        // A. La Flèche (Points Absolus)
+        // A. La Flèche
+        // Note: text prop is deprecated/removed in favor of richText
+        let arrowProps: any = {
+            start: { x: 0, y: 0 },
+            end: { x: 0, y: 0 },
+            arrowheadStart: 'none',
+            arrowheadEnd: 'arrow',
+            font: 'draw',
+        }
+
+        if (edge.label && typeof toRichText === 'function') {
+             arrowProps.richText = toRichText(edge.label)
+        }
+
         editor.createShape({
             id: arrowId,
             type: 'arrow',
             x: 0,
             y: 0,
-            props: {
-                // On passe des points explicites {x, y}
-                start: { x: startX, y: startY },
-                end: { x: endX, y: endY },
-                arrowheadStart: 'none',
-                arrowheadEnd: 'arrow',
-            },
+            props: arrowProps,
         })
 
-        // B. Le Label (Toujours séparé pour la sécurité)
-        if (edge.label) {
-            const midX = (startX + endX) / 2
-            const midY = (startY + endY) / 2
-
-            editor.createShape({
-                id: createShapeId(),
-                type: 'text',
-                x: midX,
-                y: midY,
+        // B. Bindings
+        // Dans les versions récentes de tldraw, les bindings sont des enregistrements séparés
+        editor.createBindings([
+            {
+                fromId: arrowId,
+                toId: sourceShapeId,
+                type: 'arrow',
                 props: {
-                    text: edge.label,
-                    size: 's',
-                    font: 'draw',
-                    textAlign: 'middle',
-                    autoSize: true,
-                    color: 'grey'
-                }
-            })
-        }
+                    terminal: 'start',
+                    normalizedAnchor: { x: 0.5, y: 0.5 },
+                    isExact: false,
+                    isPrecise: false,
+                },
+            },
+            {
+                fromId: arrowId,
+                toId: targetShapeId,
+                type: 'arrow',
+                props: {
+                    terminal: 'end',
+                    normalizedAnchor: { x: 0.5, y: 0.5 },
+                    isExact: false,
+                    isPrecise: false,
+                },
+            },
+        ])
 
         // Délai pour l'effet "Dessin en direct"
         await new Promise(resolve => setTimeout(resolve, 100))

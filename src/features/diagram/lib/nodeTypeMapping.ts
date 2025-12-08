@@ -69,6 +69,25 @@ export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
         color: 'blue',
         geo: 'rectangle',
         labelColor: 'white'
+    },
+    // Missing types
+    person: {
+        color: 'green',
+        geo: 'ellipse',
+        iconUrl: 'https://cdn.simpleicons.org/person',
+        labelColor: 'black'
+    },
+    mobile: {
+        color: 'grey',
+        geo: 'rectangle',
+        iconUrl: 'https://cdn.simpleicons.org/android',
+        labelColor: 'black'
+    },
+    payment: {
+        color: 'yellow',
+        geo: 'rectangle',
+        iconUrl: 'https://cdn.simpleicons.org/stripe',
+        labelColor: 'black'
     }
 }
 
