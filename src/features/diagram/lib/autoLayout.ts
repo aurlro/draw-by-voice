@@ -37,18 +37,19 @@ export interface LayoutResult {
 export function autoLayout(
     nodes: LayoutNode[],
     edges: LayoutEdge[],
-    direction: 'LR' | 'TB' = 'LR'
+    direction: 'LR' | 'TB' = 'TB'
 ): LayoutResult {
     // Créer un nouveau graphe dagre
     const g = new dagre.graphlib.Graph()
 
     // Configurer les paramètres du graphe
     g.setGraph({
-        rankdir: direction,     // Direction du layout
-        nodesep: 50,           // Espacement horizontal entre nœuds du même rang
-        ranksep: 100,          // Espacement vertical entre rangs
-        marginx: 20,           // Marge horizontale
-        marginy: 20,           // Marge verticale
+        rankdir: direction,     // Top-to-Bottom (flux naturel)
+        ranksep: 150,           // Espace VERTICAL (entre les étages) -> Augmenté pour laisser place aux labels
+        nodesep: 100,           // Espace HORIZONTAL (entre les branches) -> Augmenté pour éviter le chevauchement
+        edgesep: 50,            // Espace entre les liens
+        marginx: 50,
+        marginy: 50,
     })
 
     // Label par défaut pour les arêtes

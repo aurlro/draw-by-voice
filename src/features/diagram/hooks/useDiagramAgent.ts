@@ -120,9 +120,16 @@ export function useDiagramAgent({
             }
 
             if (msg.name === 'generate_diagram' && msg.arguments) {
+                let args
                 try {
-                    const args = JSON.parse(msg.arguments)
+                    args = JSON.parse(msg.arguments)
+                } catch (e) {
+                    // STRATÉGIE "SILENT WAIT" :
+                    // Si le JSON est incomplet, on ignore l'erreur et on attend le prochain chunk.
+                    return
+                }
 
+                try {
                     if (process.env.NODE_ENV === 'development') {
                         console.log('📦 Arguments:', args)
                     }
@@ -147,8 +154,8 @@ export function useDiagramAgent({
                     const diagramData = validationResult.data
 
                     // Générer le diagramme avec animation
-                    // generateDiagram(editor, diagramData, diagramData.explanation)
-                    animator.animate(diagramData, diagramData.explanation)
+                    generateDiagram(editor, diagramData, diagramData.explanation)
+                    // animator.animate(diagramData, diagramData.explanation)
 
                     if (process.env.NODE_ENV === 'development') {
                         console.log('✅ Diagram generation started!')
@@ -252,11 +259,38 @@ export function useDiagramAgent({
         lastToolCallArgs
     ])
 
+    /**
+     * Réinitialise complètement la session (Canvas + Contexte OpenAI)
+     * Utile pour économiser des tokens et repartir de zéro
+     */
+    const resetSession = useCallback(async () => {
+        // 1. Nettoyer le Canvas Tldraw
+        editor.selectAll()
+        const selectedIds = editor.getSelectedShapeIds()
+        if (selectedIds.length > 0) {
+            editor.deleteShapes(selectedIds)
+        }
+
+        // 2. Clear local state
+        setError(null)
+        setLastToolCallArgs(null)
+
+        // 3. Cycle de connexion (Disconnect -> Connect) pour wipe le contexte
+        if (connection.state.isConnected) {
+            connection.disconnect()
+            // Petit délai pour assurer la fermeture propre avant de reconnecter
+            setTimeout(() => {
+                connection.connect()
+            }, 500)
+        }
+    }, [editor, connection])
+
     return {
         ...aggregatedState,
         audioLevel: audioRecorder.audioLevel,
         startVoiceSession,
         stopVoiceSession,
         disconnect,
+        resetSession,
     }
 }
