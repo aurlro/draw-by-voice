@@ -6,6 +6,7 @@ import { useRealtimeConnection } from '@voice/hooks/useRealtimeConnection'
 import { useAudioRecorder } from '@voice/hooks/useAudioRecorder'
 import { useAudioPlayer } from '@voice/hooks/useAudioPlayer'
 import { generateDiagram } from '../lib/diagramGenerator'
+import { DiagramAnimator } from '../lib/DiagramAnimator'
 import { SYSTEM_PROMPT } from '@voice/lib/systemPrompt'
 import { GENERATE_DIAGRAM_FUNCTION } from '@voice/lib/functionDefinitions'
 import { DiagramDataSchema } from '@shared/lib/validation/schemas'
@@ -38,6 +39,7 @@ export function useDiagramAgent({
     onError,
 }: UseDiagramAgentProps) {
     const [error, setError] = useState<string | null>(null)
+    const [lastToolCallArgs, setLastToolCallArgs] = useState<string | null>(null)
 
     /**
      * Hook de lecture audio (pour entendre l'IA parler)
@@ -56,6 +58,11 @@ export function useDiagramAgent({
         tools: [GENERATE_DIAGRAM_FUNCTION],
         tool_choice: 'auto',
     }), [])
+
+    /**
+     * Animator instance (memoized)
+     */
+    const animator = useMemo(() => new DiagramAnimator(editor), [editor])
 
     /**
      * Hook de connexion WebSocket
@@ -120,6 +127,9 @@ export function useDiagramAgent({
                         console.log('📦 Arguments:', args)
                     }
 
+                    // Sauvegarder pour affichage debug
+                    setLastToolCallArgs(JSON.stringify(args, null, 2))
+
                     // Validation runtime avec Zod
                     const validationResult = DiagramDataSchema.safeParse(args.diagram_data)
 
@@ -136,11 +146,12 @@ export function useDiagramAgent({
 
                     const diagramData = validationResult.data
 
-                    // Générer le diagramme sur le canvas
-                    generateDiagram(editor, diagramData, diagramData.explanation)
+                    // Générer le diagramme avec animation
+                    // generateDiagram(editor, diagramData, diagramData.explanation)
+                    animator.animate(diagramData, diagramData.explanation)
 
                     if (process.env.NODE_ENV === 'development') {
-                        console.log('✅ Diagram generated!')
+                        console.log('✅ Diagram generation started!')
                     }
 
                     // Callback optionnel
@@ -173,6 +184,10 @@ export function useDiagramAgent({
             // D'abord, connecter au WebSocket
             if (!connection.state.isConnected) {
                 await connection.connect()
+            } else {
+                // Si déjà connecté (cas d'interruption), on annule la réponse en cours
+                audioPlayer.stop()
+                connection.sendMessage({ type: 'response.cancel' })
             }
 
             // Puis démarrer l'enregistrement audio
@@ -224,17 +239,22 @@ export function useDiagramAgent({
         isListening: audioRecorder.isRecording,
         isConnecting: connection.state.isConnecting,
         error: error || connection.state.error || audioRecorder.error,
+        events: connection.state.events,
+        lastToolCallArgs
     }), [
         connection.state.isConnected,
         connection.state.isConnecting,
         connection.state.error,
+        connection.state.events,
         audioRecorder.isRecording,
         audioRecorder.error,
         error,
+        lastToolCallArgs
     ])
 
     return {
         ...aggregatedState,
+        audioLevel: audioRecorder.audioLevel,
         startVoiceSession,
         stopVoiceSession,
         disconnect,

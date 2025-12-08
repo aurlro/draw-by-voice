@@ -33,7 +33,7 @@ export interface UseOpenAIRealtimeProps {
 export interface AudioRecorderRef {
     stream: MediaStream
     audioContext: AudioContext
-    processor: ScriptProcessorNode
+    processor: AudioWorkletNode
     source: MediaStreamAudioSourceNode
 }
 

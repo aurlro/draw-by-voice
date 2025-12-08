@@ -106,19 +106,28 @@ export function useAudioPlayer() {
     }, [decodeAudio, playAudioQueue])
 
     /**
-     * Nettoie les ressources audio
+     * Arrête la lecture et vide la file d'attente
      */
-    const cleanup = useCallback(() => {
+    const stop = useCallback(() => {
+        isPlayingRef.current = false
         audioQueueRef.current = []
-        if (audioContextRef.current) {
+        if (audioContextRef.current && audioContextRef.current.state === 'running') {
+            audioContextRef.current.suspend()
             audioContextRef.current.close()
             audioContextRef.current = null
         }
-        isPlayingRef.current = false
     }, [])
+
+    /**
+     * Nettoie les ressources audio
+     */
+    const cleanup = useCallback(() => {
+        stop()
+    }, [stop])
 
     return {
         playAudio,
+        stop,
         cleanup,
     }
 }

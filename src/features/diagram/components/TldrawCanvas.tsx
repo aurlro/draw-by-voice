@@ -2,7 +2,8 @@
 
 import { Tldraw, TLComponents, Editor } from '@tldraw/tldraw'
 import '@tldraw/tldraw/tldraw.css'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
+import { RichNodeShapeUtil } from '@features/diagram/shapes/RichNodeShape'
 
 interface TldrawCanvasProps {
   onMount?: (editor: Editor) => void
@@ -40,6 +41,7 @@ export default function TldrawCanvas({ onMount }: TldrawCanvasProps) {
       <Tldraw
         onMount={handleMount}
         components={components}
+        shapeUtils={useMemo(() => [RichNodeShapeUtil], [])}
         hideUi={true}
         overrides={{
           translations: {
