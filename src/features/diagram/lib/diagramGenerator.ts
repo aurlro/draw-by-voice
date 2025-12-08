@@ -1,4 +1,4 @@
-import { createShapeId, Editor } from '@tldraw/tldraw'
+import { createShapeId, Editor, DefaultFontStyle, DefaultDashStyle, DefaultSizeStyle } from '@tldraw/tldraw'
 import { autoLayout, LayoutNode, LayoutEdge } from './autoLayout'
 import type { DiagramData } from '@shared/types'
 
@@ -15,6 +15,11 @@ export function generateDiagram(
         console.error('Invalid diagram data')
         return
     }
+
+    // Options globales pour le style (désactiver le style "brouillon")
+    editor.setStyleForNextShapes(DefaultFontStyle, 'sans')
+    editor.setStyleForNextShapes(DefaultDashStyle, 'solid')
+    editor.setStyleForNextShapes(DefaultSizeStyle, 'm')
 
     // 1. Calcul du Layout
     const layoutNodes: LayoutNode[] = data.nodes.map((node) => ({
@@ -39,35 +44,18 @@ export function generateDiagram(
 
         // CAS A : C'est une Icône (Logo Tech via Simple Icons)
         if (node.type === 'icon' && node.iconName) {
-            // Création de l'image
-            const iconUrl = `https://cdn.simpleicons.org/${node.iconName.toLowerCase()}/000000`;
             editor.createShape({
                 id: shapeId,
-                type: 'image',
+                type: 'rich-node',
                 x: x,
                 y: y,
                 props: {
-                    w: 60,  // Taille fixe pour l'icône
-                    h: 60,
-                    url: iconUrl,
-                    assetId: null as any, // Indique une URL externe
-                },
-            });
-
-            // Ajout du label en dessous (texte séparé)
-            editor.createShape({
-                id: createShapeId(),
-                type: 'text',
-                x: x,
-                y: y + 70,
-                props: {
+                    w: 80,
+                    h: 80,
                     text: node.label,
-                    font: 'draw',
-                    size: 's',
-                    align: 'middle',
-                    autoSize: true,
-                    scale: 1
-                }
+                    nodeType: 'icon',
+                    iconName: node.iconName,
+                },
             });
         }
 
@@ -75,49 +63,30 @@ export function generateDiagram(
         else if (node.type === 'actor') {
             editor.createShape({
                 id: shapeId,
-                type: 'geo',
+                type: 'rich-node',
                 x: x,
                 y: y,
                 props: {
-                    geo: 'star', // Une étoile pour représenter l'acteur
-                    w: 80,       // PROPRIÉTÉ OBLIGATOIRE (pas 'width')
-                    h: 80,       // PROPRIÉTÉ OBLIGATOIRE (pas 'height')
+                    w: 80,
+                    h: 80,
                     text: node.label,
-                    font: 'draw',
-                    size: 'm',
-                    align: 'middle',
-                    verticalAlign: 'middle',
-                    growY: 0,
-                    url: '',
+                    nodeType: 'person',
                 },
             });
         }
 
-        // CAS C : C'est une forme standard (Rectangle, etc.)
+        // CAS C : C'est une forme standard (Rich Node)
         else {
-            // Mappe les types OpenAI vers les types Tldraw
-            let geoType = 'rectangle';
-            if (node.type === 'ellipse') geoType = 'ellipse';
-            if (node.type === 'diamond') geoType = 'diamond';
-            if (node.type === 'cloud') geoType = 'cloud';
-
             editor.createShape({
                 id: shapeId,
-                type: 'geo',
+                type: 'rich-node',
                 x: x,
                 y: y,
                 props: {
-                    geo: geoType,
-                    w: 150,      // Largeur par défaut OBLIGATOIRE
-                    h: 100,      // Hauteur par défaut OBLIGATOIRE
-                    text: node.label || '', // Sécurité chaîne vide
-                    font: 'draw',
-                    size: 'm',
-                    align: 'middle',
-                    verticalAlign: 'middle',
-                    growY: 0,
-                    url: '',
-                    // INTERDIT : ne jamais mettre 'width', 'height' ou 'scale' ici
+                    w: 200,
+                    h: 60,
+                    text: node.label,
+                    nodeType: node.type || 'action', // 'action', 'decision', 'input', etc.
                 },
             });
         }
@@ -147,15 +116,14 @@ export function generateDiagram(
 
         editor.createShape({
             id: createShapeId(),
-            type: 'text',
+            type: 'rich-node',
             x: textX,
             y: 0,
             props: {
+                w: 400,
+                h: 200,
                 text: explanation,
-                autoSize: true,
-                align: 'start', // Valeurs valides: 'start', 'middle', 'end', 'justify'
-                font: 'draw',   // Valeurs valides: 'draw', 'sans', 'serif', 'mono'
-                size: 'm',      // Valeurs valides: 's', 'm', 'l', 'xl'
+                nodeType: 'explanation',
             },
         });
     }

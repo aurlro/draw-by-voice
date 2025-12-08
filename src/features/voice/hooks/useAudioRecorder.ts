@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import type { AudioRecorderRef } from '@shared/types'
+
 
 /**
  * Props pour le hook useAudioRecorder
@@ -35,6 +36,53 @@ export function useAudioRecorder({
     /**
      * Démarre l'enregistrement audio
      */
+    const [audioLevel, setAudioLevel] = useState(0)
+    const animationFrameRef = useRef<number>(0)
+
+    /**
+     * Analyse le volume audio en temps réel
+     */
+    const analyzeAudio = useCallback((analyser: AnalyserNode) => {
+        const dataArray = new Uint8Array(analyser.frequencyBinCount)
+
+        const updateLevel = () => {
+            analyser.getByteFrequencyData(dataArray)
+
+            // Calculer la moyenne du volume
+            // On se concentre sur les basses/moyennes fréquences pour la voix humaine
+            let sum = 0
+            // On prend un sous-ensemble des fréquences (les premières sont souvent les plus pertinentes pour la voix)
+            const length = dataArray.length
+            for (let i = 0; i < length; i++) {
+                sum += dataArray[i]
+            }
+
+            const average = sum / length
+            // Normaliser entre 0 et 1 (255 est le max pour getByteFrequencyData)
+            const normalized = Math.min(1, average / 128)
+
+            // Lissage pour éviter les sauts trop brusques (optionnel, mais agréable visuellement)
+            setAudioLevel(prev => prev * 0.8 + normalized * 0.2)
+
+            animationFrameRef.current = requestAnimationFrame(updateLevel)
+        }
+
+        updateLevel()
+    }, [])
+
+    /**
+     * Arrête l'analyse audio
+     */
+    const stopAnalysis = useCallback(() => {
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current)
+        }
+        setAudioLevel(0)
+    }, [])
+
+    /**
+     * Démarre l'enregistrement audio
+     */
     const startRecording = useCallback(async () => {
         try {
             setError(null)
@@ -53,13 +101,28 @@ export function useAudioRecorder({
             const audioContext = new AudioContext({ sampleRate: 24000 })
             const source = audioContext.createMediaStreamSource(stream)
 
-            // Créer un ScriptProcessorNode pour capturer les échantillons PCM
-            // Note: ScriptProcessorNode est déprécié mais AudioWorklet nécessite un fichier séparé
-            const bufferSize = 4096
-            const processor = audioContext.createScriptProcessor(bufferSize, 1, 1)
+            // Créer un analyser pour la visualisation
+            const analyser = audioContext.createAnalyser()
+            analyser.fftSize = 256 // Pas besoin d'une grande précision pour juste le volume
+            analyser.smoothingTimeConstant = 0.5
+            source.connect(analyser)
 
-            processor.onaudioprocess = (e) => {
-                const inputData = e.inputBuffer.getChannelData(0)
+            // Démarrer l'analyse visuelle
+            analyzeAudio(analyser)
+
+            // Charger le module AudioWorklet
+            try {
+                await audioContext.audioWorklet.addModule('/audio-processor.js')
+            } catch (e) {
+                console.error('Failed to load audio worklet, falling back to ScriptProcessor or failing', e)
+                throw new Error('AudioWorklet module loading failed')
+            }
+
+            // Créer le noeud Worklet
+            const workletNode = new AudioWorkletNode(audioContext, 'audio-recorder-processor')
+
+            workletNode.port.onmessage = (e) => {
+                const inputData = e.data // Float32Array envoyé par le processor
 
                 // Convertir Float32Array en Int16Array (PCM16)
                 const pcm16 = new Int16Array(inputData.length)
@@ -70,23 +133,25 @@ export function useAudioRecorder({
                 }
 
                 // Convertir en base64
+                // Utilisation optimisée de TextEncoder/Decoder ou btoa
+                // Note: btoa sur des chunks binaires en JS est standard ici
                 const base64Audio = btoa(
                     String.fromCharCode(...new Uint8Array(pcm16.buffer))
                 )
 
-                // Envoyer les données audio via le callback
+                // Envoyer les données audio
                 onAudioData?.(base64Audio)
             }
 
-            // Connecter les nœuds
-            source.connect(processor)
-            processor.connect(audioContext.destination)
+            // Connecter le graphe
+            source.connect(workletNode)
+            workletNode.connect(audioContext.destination)
 
             // Stocker les références pour cleanup
             mediaRecorderRef.current = {
                 stream,
                 audioContext,
-                processor,
+                processor: workletNode, // On garde le nom "processor" mais c'est un WorkletNode
                 source,
             }
 
@@ -103,12 +168,14 @@ export function useAudioRecorder({
             onError?.(errorMsg)
             throw err
         }
-    }, [onAudioData, onError])
+    }, [analyzeAudio, onAudioData, onError])
 
     /**
      * Arrête l'enregistrement audio
      */
     const stopRecording = useCallback(() => {
+        stopAnalysis()
+
         if (mediaRecorderRef.current) {
             const recorder = mediaRecorderRef.current
 
@@ -132,6 +199,15 @@ export function useAudioRecorder({
                 console.log('⏹️ Recording stopped')
             }
         }
+    }, [stopAnalysis])
+
+    // Cleanup effect pour s'assurer qu'on arrête l'animation frame si le composant est démonté
+    useEffect(() => {
+        return () => {
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current)
+            }
+        }
     }, [])
 
     return {
@@ -139,5 +215,6 @@ export function useAudioRecorder({
         error,
         startRecording,
         stopRecording,
+        audioLevel
     }
 }

@@ -9,6 +9,7 @@ export interface RealtimeConnectionState {
     isConnected: boolean
     isConnecting: boolean
     error: string | null
+    events: unknown[]
 }
 
 /**
@@ -52,6 +53,7 @@ export function useRealtimeConnection({
         isConnected: false,
         isConnecting: false,
         error: null,
+        events: []
     })
 
     const wsRef = useRef<WebSocket | null>(null)
@@ -169,6 +171,12 @@ export function useRealtimeConnection({
 
                     // Notifier tous les handlers abonnés
                     notifyMessageHandlers(msg)
+
+                    // Ajouter aux events (garder les 50 derniers)
+                    setState(prev => ({
+                        ...prev,
+                        events: [msg, ...prev.events].slice(0, 50)
+                    }))
                 }
 
                 // Event: Erreur
@@ -211,7 +219,7 @@ export function useRealtimeConnection({
             wsRef.current.close()
             wsRef.current = null
         }
-        setState({ isConnected: false, isConnecting: false, error: null })
+        setState(prev => ({ ...prev, isConnected: false, isConnecting: false, error: null }))
     }, [])
 
     /**

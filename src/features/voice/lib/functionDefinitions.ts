@@ -38,10 +38,12 @@ export const GENERATE_DIAGRAM_FUNCTION = {
                                         'rectangle', 'ellipse', 'diamond', 'cloud',
                                         // Special types for icons and actors
                                         'icon', 'actor',
+                                        // Specific Entity types
+                                        'mobile', 'server', 'database', 'person', 'payment',
                                         // Legacy abstract types (backward compatibility)
-                                        'user', 'server', 'database', 'decision', 'step'
+                                        'user', 'decision', 'step'
                                     ] as const satisfies readonly NodeType[],
-                                    description: 'Type of node. Prefer Tldraw geo shapes: rectangle (boxes), ellipse (rounded), diamond (decisions), cloud (abstract). Special: icon (external logos via CDN), actor (user/person). Legacy: user, server, database, decision, step'
+                                    description: 'Type of node. Prefer Tldraw geo shapes: rectangle (boxes), ellipse (rounded), diamond (decisions), cloud (abstract). Special: icon (external logos via CDN). Entities: actor (user), mobile (smartphone), server (backend), database (db), payment (credit card). Legacy: decision, step'
                                 },
                                 iconName: {
                                     type: 'string',
