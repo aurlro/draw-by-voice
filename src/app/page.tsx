@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-// import { TldrawCanvas, TestButton, AutoLayoutButton, DemoButton } from '@features/diagram'
-import { TldrawCanvas } from '@features/diagram'
+import { TldrawCanvas, DemoButton } from '@features/diagram'
 import { VoiceControl } from '@features/voice'
 import { Editor } from '@tldraw/tldraw'
 
@@ -32,7 +31,7 @@ export default function Home() {
       <TldrawCanvas onMount={handleEditorMount} />
       {editor && (
         <>
-          {/* <DemoButton editor={editor} /> */}
+          <DemoButton editor={editor} />
           <VoiceControl editor={editor} />
         </>
       )}

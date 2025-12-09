@@ -5,6 +5,7 @@ import { Editor } from '@tldraw/tldraw'
 import { generateDiagram } from '../lib/diagramGenerator'
 import { MOCK_DIAGRAMS } from '../lib/mockData'
 
+<<<<<<< HEAD
 /**
  * Props for the DemoButton component.
  */
@@ -21,25 +22,42 @@ interface DemoButtonProps {
  * @param props - The props for the component.
  * @returns The rendered DemoButton component.
  */
+=======
+interface DemoButtonProps {
+    editor: Editor
+}
+
+>>>>>>> origin/enhance-diagram-visuals-bindings
 export default function DemoButton({ editor }: DemoButtonProps) {
     const [selectedDemo, setSelectedDemo] = useState<string>('AWS Architecture')
     const [isOpen, setIsOpen] = useState(false)
 
+<<<<<<< HEAD
     /**
      * Handles the generation of the selected demo diagram.
      */
+=======
+>>>>>>> origin/enhance-diagram-visuals-bindings
     const handleGenerateDemo = () => {
         const diagramData = MOCK_DIAGRAMS[selectedDemo as keyof typeof MOCK_DIAGRAMS]
 
         if (diagramData) {
             console.log('🎭 Generating demo diagram:', selectedDemo)
+<<<<<<< HEAD
             generateDiagram(editor, diagramData, 'LR')
+=======
+            generateDiagram(editor, diagramData, diagramData.explanation || '')
+>>>>>>> origin/enhance-diagram-visuals-bindings
             setIsOpen(false)
         }
     }
 
     return (
+<<<<<<< HEAD
         <div className="fixed top-40 right-4 z-50 flex flex-col items-end gap-2">
+=======
+        <div className="fixed top-40 left-4 z-50 flex flex-col items-start gap-2">
+>>>>>>> origin/enhance-diagram-visuals-bindings
             {/* Dropdown menu */}
             {isOpen && (
                 <div className="bg-white border border-gray-300 rounded-lg shadow-xl p-2 min-w-[200px]">

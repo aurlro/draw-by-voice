@@ -1,5 +1,6 @@
 import type { NodeType } from '@shared/types'
 
+<<<<<<< HEAD
 /**
  * Configuration interface for a node type.
  */
@@ -17,6 +18,15 @@ export interface NodeTypeConfig {
 /**
  * Configuration mapping for all supported node types.
  */
+=======
+export interface NodeTypeConfig {
+    color: string
+    geo: 'rectangle' | 'diamond' | 'ellipse' | 'cloud'
+    iconUrl?: string // Nouveau champ optionnel
+    labelColor?: string
+}
+
+>>>>>>> origin/enhance-diagram-visuals-bindings
 export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
     // Direct Tldraw geo shape types
     rectangle: {
@@ -39,12 +49,20 @@ export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
         geo: 'cloud',
         labelColor: 'black'
     },
+<<<<<<< HEAD
     // Special types for icons and actors
+=======
+    // Types spéciaux pour icônes et acteurs
+>>>>>>> origin/enhance-diagram-visuals-bindings
     icon: {
         color: 'grey',
         geo: 'rectangle',
         labelColor: 'black'
+<<<<<<< HEAD
         // iconUrl will be determined dynamically via iconName
+=======
+        // iconUrl sera déterminé dynamiquement via iconName
+>>>>>>> origin/enhance-diagram-visuals-bindings
     },
     actor: {
         color: 'green',
@@ -52,6 +70,7 @@ export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
         iconUrl: 'https://cdn.simpleicons.org/person',
         labelColor: 'black'
     },
+<<<<<<< HEAD
     // Entity types (Architecture)
     person: {
         color: 'green',
@@ -69,6 +88,8 @@ export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
         geo: 'rectangle',
         labelColor: 'black'
     },
+=======
+>>>>>>> origin/enhance-diagram-visuals-bindings
     // Legacy abstract types (mapped to geo shapes)
     user: {
         color: 'green',
@@ -96,6 +117,7 @@ export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
         color: 'blue',
         geo: 'rectangle',
         labelColor: 'white'
+<<<<<<< HEAD
     }
 }
 
@@ -104,6 +126,30 @@ export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
  * @param type - The node type.
  * @returns The configuration object for the node type.
  */
+=======
+    },
+    // Missing types
+    person: {
+        color: 'green',
+        geo: 'ellipse',
+        iconUrl: 'https://cdn.simpleicons.org/person',
+        labelColor: 'black'
+    },
+    mobile: {
+        color: 'grey',
+        geo: 'rectangle',
+        iconUrl: 'https://cdn.simpleicons.org/android',
+        labelColor: 'black'
+    },
+    payment: {
+        color: 'yellow',
+        geo: 'rectangle',
+        iconUrl: 'https://cdn.simpleicons.org/stripe',
+        labelColor: 'black'
+    }
+}
+
+>>>>>>> origin/enhance-diagram-visuals-bindings
 export function getNodeConfig(type: NodeType): NodeTypeConfig {
     return NODE_TYPE_CONFIG[type] || NODE_TYPE_CONFIG.step
 }

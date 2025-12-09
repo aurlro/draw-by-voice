@@ -1,6 +1,7 @@
 // Feature: Diagram - Public Exports
 
 // Components (default exports)
+<<<<<<< HEAD
 /**
  * TldrawCanvas Component.
  * The main canvas component that renders the Tldraw editor and the diagram.
@@ -45,3 +46,19 @@ export { NODE_TYPE_CONFIG, getNodeConfig } from './lib/nodeTypeMapping'
  * Mock data for diagrams used in demos and testing.
  */
 export { MOCK_DIAGRAMS } from './lib/mockData'
+=======
+export { default as TldrawCanvas } from './components/TldrawCanvas'
+export { default as AutoLayoutButton } from './components/AutoLayoutButton'
+export { default as DemoButton } from './components/DemoButton'
+export { default as TestButton } from './components/TestButton'
+
+// Hooks
+export { useDiagramAgent } from './hooks/useDiagramAgent'
+
+// Lib
+export { generateDiagram } from './lib/diagramGenerator'
+export { autoLayout } from './lib/autoLayout'
+export { NODE_TYPE_CONFIG, getNodeConfig } from './lib/nodeTypeMapping'
+export { MOCK_DIAGRAMS } from './lib/mockData'
+
+>>>>>>> origin/enhance-diagram-visuals-bindings

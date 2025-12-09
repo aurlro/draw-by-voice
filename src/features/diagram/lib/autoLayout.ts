@@ -45,11 +45,11 @@ export function autoLayout(
     // Configure graph parameters
     g.setGraph({
         rankdir: direction,     // Top-to-Bottom (natural flow)
-        ranksep: 150,           // VERTICAL spacing (between ranks) -> Increased for labels
-        nodesep: 100,           // HORIZONTAL spacing (between branches) -> Increased to avoid overlap
-        edgesep: 50,            // Spacing between edges
-        marginx: 50,
-        marginy: 50,
+        ranksep: 200,           // VERTICAL spacing (between ranks) -> Increased for labels
+        nodesep: 150,           // HORIZONTAL spacing (between branches) -> Increased to avoid overlap
+        edgesep: 80,            // Spacing between edges
+        marginx: 100,
+        marginy: 100,
     })
 
     // Default edge label

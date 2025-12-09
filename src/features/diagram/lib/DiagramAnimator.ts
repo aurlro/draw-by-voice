@@ -9,7 +9,11 @@ const ANIMATION_DELAY_MS = 250
 const TEXT_STREAM_SPEED_MS = 20
 
 /**
+<<<<<<< HEAD
  * Orchestrator for diagram creation animation.
+=======
+ * Orchestrateur pour l'animation de la création du diagramme
+>>>>>>> origin/enhance-diagram-visuals-bindings
  */
 export class DiagramAnimator {
     private editor: Editor
@@ -21,9 +25,13 @@ export class DiagramAnimator {
     }
 
     /**
+<<<<<<< HEAD
      * Animates the generation of the diagram.
      * @param data - The diagram data.
      * @param explanation - Optional explanation text.
+=======
+     * Anime la génération du diagramme
+>>>>>>> origin/enhance-diagram-visuals-bindings
      */
     async animate(data: DiagramData, explanation: string = '') {
         if (this.isAnimating) {
@@ -34,12 +42,20 @@ export class DiagramAnimator {
         this.abortController = new AbortController()
 
         try {
+<<<<<<< HEAD
             // Style configuration
+=======
+            // Configuration du style
+>>>>>>> origin/enhance-diagram-visuals-bindings
             this.editor.setStyleForNextShapes(DefaultFontStyle, 'sans')
             this.editor.setStyleForNextShapes(DefaultDashStyle, 'solid')
             this.editor.setStyleForNextShapes(DefaultSizeStyle, 'm')
 
+<<<<<<< HEAD
             // 1. Calculate Layout (identical to diagramGenerator)
+=======
+            // 1. Calcul du Layout (identique à diagramGenerator)
+>>>>>>> origin/enhance-diagram-visuals-bindings
             const layoutNodes: LayoutNode[] = data.nodes.map((node) => ({
                 id: node.id,
                 width: DEFAULT_NODE_WIDTH,
@@ -53,14 +69,21 @@ export class DiagramAnimator {
 
             const layout = autoLayout(layoutNodes, layoutEdges, 'LR')
 
+<<<<<<< HEAD
             // 2. Progressive creation of nodes
             for (const node of data.nodes) {
                 if (this.abortController?.signal.aborted) break
+=======
+            // 2. Création progressive des nœuds
+            for (const node of data.nodes) {
+                if (this.abortController.signal.aborted) break
+>>>>>>> origin/enhance-diagram-visuals-bindings
 
                 const layoutPos = layout.nodes.get(node.id)
                 const x = node.x || layoutPos?.x || 0
                 const y = node.y || layoutPos?.y || 0
 
+<<<<<<< HEAD
                 // Create node
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 await this.createNodeAnimated(node as any, x, y) // Removed unused shapeId
@@ -76,6 +99,22 @@ export class DiagramAnimator {
 
             // 4. Add explanation (streaming)
             if (explanation && !this.abortController?.signal.aborted) {
+=======
+                // Créer le nœud
+                const shapeId = await this.createNodeAnimated(node as any, x, y)
+
+                // Attendre un peu avant le prochain
+                await this.wait(ANIMATION_DELAY_MS)
+            }
+
+            // 3. Création des liens (tous d'un coup ou animés aussi ? Disons groupés pour l'instant)
+            if (!this.abortController.signal.aborted) {
+                this.createEdges(data.edges, layout)
+            }
+
+            // 4. Ajouter l'explication (streaming)
+            if (explanation && !this.abortController.signal.aborted) {
+>>>>>>> origin/enhance-diagram-visuals-bindings
                 await this.wait(500)
                 await this.streamExplanation(explanation, (layout.width || 0) + 50)
             }
@@ -91,22 +130,34 @@ export class DiagramAnimator {
     }
 
     /**
+<<<<<<< HEAD
      * Creates a node with text animation.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private async createNodeAnimated(node: any, x: number, y: number): Promise<TLShapeId> {
         // Validation and formatting of Tldraw ID (must start with 'shape:')
+=======
+     * Crée un nœud avec animation de texte
+     */
+    private async createNodeAnimated(node: any, x: number, y: number): Promise<TLShapeId> {
+        // Validation et formatage de l'ID Tldraw (doit commencer par 'shape:')
+>>>>>>> origin/enhance-diagram-visuals-bindings
         let shapeId: TLShapeId
         if (typeof node.id === 'string' && node.id.startsWith('shape:')) {
             shapeId = node.id as TLShapeId
         } else if (typeof node.id === 'string') {
+<<<<<<< HEAD
             // If ID is a simple string (e.g. 'node-1'), prefix it
+=======
+            // Si l'ID est une simple string (ex: 'node-1'), on le préfixe
+>>>>>>> origin/enhance-diagram-visuals-bindings
             shapeId = `shape:${node.id}` as TLShapeId
         } else {
             // Fallback
             shapeId = createShapeId()
         }
 
+<<<<<<< HEAD
         // Determine type and initial props (Universal Rich Node)
         const type = 'rich-node'
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -122,6 +173,23 @@ export class DiagramAnimator {
             props = {
                 w: 80, h: 80,
                 text: '', // Label separated or integrated? Integrated in RichNodeShape.
+=======
+        // Déterminer le type et les props initiales (Universal Rich Node)
+        let type = 'rich-node'
+        let props: any = {
+            w: DEFAULT_NODE_WIDTH,
+            h: DEFAULT_NODE_HEIGHT,
+            text: '', // On commence vide pour le streaming
+            nodeType: node.type || 'action',
+        }
+
+        // Cas spéciaux: Adapter les props pour RichNodeShape
+        if (node.type === 'icon' && node.iconName) {
+            props = {
+                w: 80, h: 80,
+                text: '', // Label séparé ou intégré ? Intégré dans RichNodeShape (voir composant) -> Ah non, RichNodeShape affiche text en bas.
+                // Wait, logic change: RichNodeShape now handles icon display internally if nodeType='icon'
+>>>>>>> origin/enhance-diagram-visuals-bindings
                 nodeType: 'icon',
                 iconName: node.iconName,
             }
@@ -134,7 +202,11 @@ export class DiagramAnimator {
             }
         }
 
+<<<<<<< HEAD
         // Initial shape creation
+=======
+        // Création de la forme initiale
+>>>>>>> origin/enhance-diagram-visuals-bindings
         this.editor.createShape({
             id: shapeId,
             type,
@@ -143,17 +215,30 @@ export class DiagramAnimator {
             props,
         })
 
+<<<<<<< HEAD
         // "Streaming Text" animation
+=======
+        // Animation "Streaming Text"
+>>>>>>> origin/enhance-diagram-visuals-bindings
         const fullText = node.label || ''
         if (fullText) {
             await this.streamTextToShape(shapeId, fullText)
         }
 
         return shapeId
+<<<<<<< HEAD
     }
 
     /**
      * Simulates text writing character by character.
+=======
+
+        return shapeId
+    }
+
+    /**
+     * Simule l'écriture du texte caractère par caractère
+>>>>>>> origin/enhance-diagram-visuals-bindings
      */
     private async streamTextToShape(shapeId: TLShapeId, fullText: string) {
         for (let i = 1; i <= fullText.length; i++) {
@@ -163,24 +248,39 @@ export class DiagramAnimator {
 
             this.editor.updateShape({
                 id: shapeId,
+<<<<<<< HEAD
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 type: (this.editor.getShape(shapeId)?.type as any) || 'rich-node',
                 props: { text: partialText }
             })
 
             // Slight speed variation for "human" effect
+=======
+                type: this.editor.getShape(shapeId)?.type as any,
+                props: { text: partialText }
+            })
+
+            // Variation légère de la vitesse pour effet "humain"
+>>>>>>> origin/enhance-diagram-visuals-bindings
             const randomDelay = TEXT_STREAM_SPEED_MS + Math.random() * 10
             await this.wait(randomDelay)
         }
     }
 
     /**
+<<<<<<< HEAD
      * Creates edges.
      */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private createEdges(edges: any[], layout: any) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         edges.forEach((edge: any) => {
+=======
+     * Crée les liens
+     */
+    private createEdges(edges: any[], layout: any) {
+        edges.forEach((edge) => {
+>>>>>>> origin/enhance-diagram-visuals-bindings
             const fromNode = layout.nodes.get(edge.source)
             const toNode = layout.nodes.get(edge.target)
             if (!fromNode || !toNode) return
@@ -197,7 +297,11 @@ export class DiagramAnimator {
     }
 
     /**
+<<<<<<< HEAD
      * Streams the final explanation.
+=======
+     * Stream l'explication finale
+>>>>>>> origin/enhance-diagram-visuals-bindings
      */
     private async streamExplanation(text: string, x: number) {
         const id = createShapeId()
@@ -208,7 +312,13 @@ export class DiagramAnimator {
             y: 0,
             props: {
                 w: 300,
+<<<<<<< HEAD
                 h: 200, // Approximate height, RichNode uses HTMLContainer so content adapts
+=======
+                h: 200, // Hauteur approximative, RichNode n'a pas d'autoSize mais le contenu HTML scrolera ou dépassera si besoin.
+                // Note: RichNodeShape utilise HTMLContainer, donc le contenu s'adapte mais la hit box est w/h.
+                // Idéalement on calculerait la taille mais pour l'instant une taille fixe large est OK.
+>>>>>>> origin/enhance-diagram-visuals-bindings
                 text: '',
                 nodeType: 'explanation',
             },
@@ -221,9 +331,12 @@ export class DiagramAnimator {
         return new Promise(resolve => setTimeout(resolve, ms))
     }
 
+<<<<<<< HEAD
     /**
      * Cancels the current animation.
      */
+=======
+>>>>>>> origin/enhance-diagram-visuals-bindings
     cancel() {
         if (this.abortController) {
             this.abortController.abort()

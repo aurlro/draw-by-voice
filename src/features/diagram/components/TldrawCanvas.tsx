@@ -5,6 +5,7 @@ import '@tldraw/tldraw/tldraw.css'
 import { useCallback, useMemo } from 'react'
 import { RichNodeShapeUtil } from '@features/diagram/shapes/RichNodeShape'
 
+<<<<<<< HEAD
 /**
  * Props for the TldrawCanvas component.
  */
@@ -21,6 +22,12 @@ interface TldrawCanvasProps {
  * @param props - The props for the component.
  * @returns The rendered TldrawCanvas component.
  */
+=======
+interface TldrawCanvasProps {
+  onMount?: (editor: Editor) => void
+}
+
+>>>>>>> origin/enhance-diagram-visuals-bindings
 export default function TldrawCanvas({ onMount }: TldrawCanvasProps) {
   const handleMount = useCallback((editor: Editor) => {
     if (onMount) {
@@ -28,7 +35,11 @@ export default function TldrawCanvas({ onMount }: TldrawCanvasProps) {
     }
   }, [onMount])
 
+<<<<<<< HEAD
   // Configuration to disable all default UI elements
+=======
+  // Configuration pour désactiver tous les éléments UI par défaut
+>>>>>>> origin/enhance-diagram-visuals-bindings
   const components: TLComponents = {
     Toolbar: null,
     HelpMenu: null,

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 
+<<<<<<< HEAD
 /**
  * Props for the VoiceIndicator component.
  */
@@ -7,10 +8,16 @@ interface VoiceIndicatorProps {
     /**
      * Normalized audio level between 0 and 1.
      * Used to drive the visual feedback of the indicator.
+=======
+interface VoiceIndicatorProps {
+    /**
+     * Normalized audio level between 0 and 1
+>>>>>>> origin/enhance-diagram-visuals-bindings
      */
     audioLevel: number;
 }
 
+<<<<<<< HEAD
 /**
  * VoiceIndicator Component.
  * Visualizes the current audio level with a pulsing halo effect.
@@ -18,6 +25,8 @@ interface VoiceIndicatorProps {
  * @param props - The props for the component.
  * @returns The rendered VoiceIndicator component.
  */
+=======
+>>>>>>> origin/enhance-diagram-visuals-bindings
 export const VoiceIndicator: React.FC<VoiceIndicatorProps> = ({ audioLevel }) => {
     // Scale dynamically based on audio volume.
     // We add a base scale (1) + a multiplier for the audio level.

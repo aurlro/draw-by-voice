@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { VoiceIndicator } from './VoiceIndicator';
 
+<<<<<<< HEAD
 /**
  * Props for the RealtimeStatusPanel component.
  */
@@ -35,6 +36,21 @@ interface RealtimeStatusPanelProps {
  * @param props - The props for the component.
  * @returns The rendered RealtimeStatusPanel component.
  */
+=======
+interface RealtimeStatusPanelProps {
+    isActive: boolean;
+    isListening: boolean;
+    isConnecting: boolean;
+    error: string | null;
+    audioLevel: number;
+    events: unknown[];
+    lastToolCallArgs: string | null;
+    onToggleSession: () => void;
+    onDisconnect: () => void;
+    onReset: () => void;
+}
+
+>>>>>>> origin/enhance-diagram-visuals-bindings
 export const RealtimeStatusPanel: React.FC<RealtimeStatusPanelProps> = ({
     isActive,
     isListening,
@@ -151,7 +167,11 @@ export const RealtimeStatusPanel: React.FC<RealtimeStatusPanelProps> = ({
                 </div>
                 <div ref={logsRef} className="flex-1 overflow-y-auto p-2 space-y-1 bg-white">
                     {events.length === 0 && <span className="text-gray-300 italic">No events yet</span>}
+<<<<<<< HEAD
                     {events.map((e: any, i) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
+=======
+                    {events.map((e: any, i) => (
+>>>>>>> origin/enhance-diagram-visuals-bindings
                         <div key={i} className="flex gap-2 text-[10px] border-b border-gray-50 pb-1 last:border-0">
                             <span className="text-gray-400 w-16 shrink-0 truncate" title={e.event_id || 'no-id'}>
                                 {e.type?.split('.').pop()}
