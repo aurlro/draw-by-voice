@@ -56,11 +56,7 @@ test.describe('Voice to Diagram E2E', () => {
         // 2. Intercept WebSocket constructor to redirect to local mock server
         await page.addInitScript(() => {
             const OriginalWebSocket = window.WebSocket;
-<<<<<<< HEAD
             // @ts-expect-error Mocking WebSocket for test environment
-=======
-            // @ts-ignore
->>>>>>> origin/enhance-diagram-visuals-bindings
             window.WebSocket = function (url, protocols) {
                 if (url.includes('api.openai.com')) {
                     console.log('Redirecting WS to mock server');
@@ -69,7 +65,6 @@ test.describe('Voice to Diagram E2E', () => {
                 return new OriginalWebSocket(url, protocols);
             }
             // Copy constants
-<<<<<<< HEAD
             // @ts-expect-error Copying constants to mock
             window.WebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
             // @ts-expect-error Copying constants to mock
@@ -77,15 +72,6 @@ test.describe('Voice to Diagram E2E', () => {
             // @ts-expect-error Copying constants to mock
             window.WebSocket.CLOSING = OriginalWebSocket.CLOSING;
             // @ts-expect-error Copying constants to mock
-=======
-            // @ts-ignore
-            window.WebSocket.CONNECTING = OriginalWebSocket.CONNECTING;
-            // @ts-ignore
-            window.WebSocket.OPEN = OriginalWebSocket.OPEN;
-            // @ts-ignore
-            window.WebSocket.CLOSING = OriginalWebSocket.CLOSING;
-            // @ts-ignore
->>>>>>> origin/enhance-diagram-visuals-bindings
             window.WebSocket.CLOSED = OriginalWebSocket.CLOSED;
         });
 

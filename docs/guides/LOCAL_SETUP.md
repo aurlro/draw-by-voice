@@ -1,18 +1,18 @@
 # 🚀 Lancement Local - Draw by Voice
 
-Ce guide vous explique comment installer et lancer le projet **Draw by Voice** sur votre machine locale.
+Ce guide vous explique comment installer, lancer en développement, et simuler un environnement de production sur votre machine locale.
 
 ## Prérequis
 
-- **Node.js** (version 18 ou supérieure recommandée)
+- **Node.js** (version 20 ou supérieure recommandée)
 - **npm** (installé avec Node.js)
 - Une clé API **OpenAI** (avec accès à l'API Realtime)
 
-## Installation
+## 📥 1. Installation
 
-1.  **Cloner le projet** (si ce n'est pas déjà fait) :
+1.  **Cloner le projet** :
     ```bash
-    git clone <votre-repo-url>
+    git clone https://github.com/your-username/draw-by-voice.git
     cd draw-by-voice
     ```
 
@@ -21,7 +21,7 @@ Ce guide vous explique comment installer et lancer le projet **Draw by Voice** s
     npm install
     ```
 
-## Configuration
+## ⚙️ 2. Configuration
 
 1.  **Créer le fichier d'environnement** :
     Dupliquez le fichier `.env.local.example` et renommez-le en `.env.local` :
@@ -30,30 +30,62 @@ Ce guide vous explique comment installer et lancer le projet **Draw by Voice** s
     ```
 
 2.  **Ajouter votre clé API OpenAI** :
-    Ouvrez le fichier `.env.local` et ajoutez votre clé :
+    Ouvrez le fichier `.env.local` avec votre éditeur de texte préféré et ajoutez votre clé :
     ```env
     OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxx
     ```
-    *Note : Assurez-vous que votre clé a accès aux modèles Realtime.*
+    > **⚠️ Important** : Assurez-vous que votre clé a accès au modèle `gpt-4o-realtime-preview` ou équivalent.
 
-## Lancement
+## 🛠️ 3. Développement (Mode Dev)
 
-1.  **Démarrer le serveur de développement** :
+Pour lancer l'application en mode développement (avec rechargement à chaud) :
+
+```bash
+npm run dev
+```
+
+- L'application sera accessible sur : [http://localhost:3000](http://localhost:3000)
+
+## 🚀 4. Production (Simulation Locale)
+
+Pour simuler un environnement de production localement (optimisé, sans logs de debug, similaire au déploiement Vercel) :
+
+1.  **Construire l'application (Build)** :
+    Cette étape compile le code TypeScript et optimise les assets.
     ```bash
-    npm run dev
+    npm run build
+    ```
+    *Si vous rencontrez des erreurs lors du build, vérifiez que `npm run lint` ne renvoie pas d'erreurs bloquantes.*
+
+2.  **Lancer le serveur de production** :
+    ```bash
+    npm run start
     ```
 
-2.  **Accéder à l'application** :
-    Ouvrez votre navigateur et allez sur :
-    [http://localhost:3000](http://localhost:3000)
+- L'application sera accessible sur : [http://localhost:3000](http://localhost:3000)
+- En ce mode, les performances sont maximales et les logs de développement sont désactivés.
 
-## Utilisation
+## 🧪 5. Vérification et Tests
 
-1.  **Autoriser le micro** : Lors de la première utilisation, le navigateur vous demandera l'autorisation d'utiliser le microphone. Acceptez pour utiliser les commandes vocales.
-2.  **Mode Démo** : Cliquez sur le bouton "Demo" pour générer des diagrammes d'exemple sans utiliser l'API.
-3.  **Mode Vocal** : Cliquez sur le bouton "Micro", parlez pour décrire votre architecture (ex: "Dessine une architecture AWS avec un load balancer et deux serveurs"), et voyez le diagramme se générer en temps réel !
+Pour vous assurer que tout fonctionne correctement avant de déployer :
 
-## Dépannage
+- **Linter** (Analyse statique du code) :
+    ```bash
+    npm run lint
+    ```
 
-- **Erreur de connexion** : Vérifiez votre clé API dans `.env.local`.
-- **Microphone inactif** : Vérifiez les permissions de votre navigateur (souvent une icône de caméra/micro dans la barre d'adresse).
+- **Tests E2E** (Playwright) :
+    Nécessite l'installation des navigateurs de test une première fois :
+    ```bash
+    npx playwright install
+    ```
+    Puis lancez les tests :
+    ```bash
+    npx playwright test
+    ```
+
+## ❓ Dépannage
+
+- **Erreur "Module not found"** : Relancez `npm install`.
+- **Erreur de build TypeScript** : Vérifiez les logs, corrigez les erreurs de type.
+- **Erreur WebSocket / OpenAI** : Vérifiez que votre `OPENAI_API_KEY` est valide et a les crédits nécessaires.

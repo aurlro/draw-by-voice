@@ -1,11 +1,7 @@
 import type { DiagramData } from '@shared/types'
 
 /**
-<<<<<<< HEAD
- * Mock data for testing the system without a real API.
-=======
  * Données mockées pour tester le système sans API réelle
->>>>>>> origin/enhance-diagram-visuals-bindings
  */
 
 export const MOCK_AWS_ARCHITECTURE: DiagramData = {
@@ -82,19 +78,13 @@ export const MOCK_CICD_PIPELINE: DiagramData = {
 }
 
 /**
-<<<<<<< HEAD
- * List of all available mock diagrams.
-=======
  * Liste de tous les diagrammes mockés disponibles
->>>>>>> origin/enhance-diagram-visuals-bindings
  */
 export const MOCK_DIAGRAMS: Record<string, DiagramData> = {
     'AWS Architecture': MOCK_AWS_ARCHITECTURE,
     'Login Flow': MOCK_LOGIN_FLOW,
     'API Architecture': MOCK_API_ARCHITECTURE,
     'CI/CD Pipeline': MOCK_CICD_PIPELINE,
-<<<<<<< HEAD
-=======
     'Rich Tech Stack': {
         nodes: [
             { id: 'dev', label: 'Developer', type: 'actor', x: 0, y: 0 },
@@ -111,7 +101,6 @@ export const MOCK_DIAGRAMS: Record<string, DiagramData> = {
         ],
         explanation: 'A modern stack with specific icons: GitHub, Vercel, Next.js and Supabase.'
     },
->>>>>>> origin/enhance-diagram-visuals-bindings
     'Online Purchase Cycle': {
         nodes: [
             { id: 'customer', label: 'Customer', type: 'user', x: 0, y: 0 },
