@@ -323,8 +323,8 @@ cache: {
 
 ## 📚 Documentation Complémentaire
 
-- [Guide d'installation détaillé](./LOCAL_SETUP.md)
-- [Spécifications techniques](./SPECIFICATIONS.md)
+- [Guide d'installation détaillé](./docs/guides/LOCAL_SETUP.md)
+- [Spécifications techniques](./docs/specs/SPECIFICATIONS.md)
 - [OpenAI Realtime API Docs](https://platform.openai.com/docs/guides/realtime)
 - [tldraw SDK Docs](https://tldraw.dev)
 
