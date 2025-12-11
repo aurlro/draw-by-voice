@@ -1,196 +1,125 @@
-import { createShapeId, Editor, DefaultFontStyle, DefaultDashStyle, DefaultSizeStyle, TLShapeId } from '@tldraw/tldraw'
-// @ts-ignore - toRichText might be missing in type definitions but present in runtime or tldraw package
-import { toRichText } from '@tldraw/tldraw'
-import { autoLayout, LayoutNode, LayoutEdge } from './autoLayout'
+import { LayoutNode, LayoutEdge, autoLayout } from './autoLayout'
+import { createShapeId, Editor } from '@tldraw/tldraw'
 import type { DiagramData } from '@shared/types'
+import { getNodeConfig } from './nodeTypeMapping'
 
-/**
- * Generates a diagram on the Tldraw editor based on the provided data.
- * It handles creating nodes, edges, applying layout, and animations.
- *
- * @param editor - The Tldraw editor instance.
- * @param data - The diagram data (nodes and edges).
- * @param explanation - Optional textual explanation to add to the canvas.
- */
-export async function generateDiagram(
-    editor: Editor,
-    data: DiagramData,
-    explanation: string = '',
-): Promise<void> {
-    if (!editor || !data.nodes || data.nodes.length === 0) {
-        console.error('Invalid diagram data')
-        return
-    }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function generateDiagram(editor: Editor, data: DiagramData, explanation: string = '') {
+    if (!editor) return
 
-    // Global style options (disable "draft" style)
-    editor.setStyleForNextShapes(DefaultFontStyle, 'sans')
-    editor.setStyleForNextShapes(DefaultDashStyle, 'solid')
-    editor.setStyleForNextShapes(DefaultSizeStyle, 'm')
+    // 1. Prepare data for Dagre (Layout)
+    const nodeWidth = 200
+    const nodeHeight = 80
 
-    // Helper for dimensions
-    const getNodeDimensions = (type: string) => {
-        if (type === 'icon' || type === 'actor' || type === 'mobile' || type === 'payment') return { w: 80, h: 80 }
-        if (['server', 'database', 'person'].includes(type)) return { w: 100, h: 100 }
-        return { w: 200, h: 60 } // Standard Rectangle
-    }
-
-    // 1. Calculate Layout with REAL dimensions
-    const layoutNodes: LayoutNode[] = data.nodes.map((node) => {
-        const dim = getNodeDimensions(node.type)
-        return {
-            id: node.id,
-            width: dim.w,
-            height: dim.h,
-        }
-    })
+    const layoutNodes: LayoutNode[] = data.nodes.map((node) => ({
+        id: node.id,
+        width: nodeWidth,
+        height: nodeHeight,
+    }))
 
     const layoutEdges: LayoutEdge[] = data.edges.map((edge) => ({
         from: edge.source,
         to: edge.target,
     }))
 
-    // Calculate layout (TB for top-to-bottom)
-    const layout = autoLayout(layoutNodes, layoutEdges, 'TB')
+    // 2. Calculate Layout
+    // Direction 'LR' (Left to Right) is generally better for architectures
+    const layout = autoLayout(layoutNodes, layoutEdges, 'LR')
 
-    // 0. ID Mapping: AI ID -> Tldraw ID map
-    // Critical for edges to find the correct nodes
-    const idMap = new Map<string, TLShapeId>();
+    // 3. Create Nodes
+    data.nodes.forEach((node) => {
+        const position = layout.nodes.get(node.id)
+        if (!position) return
 
-    // 2. Setup Camera (Approximation)
-    if (layout.width > 0 && layout.height > 0) {
-        const center = { x: layout.width / 2, y: layout.height / 2 }
-        editor.centerOnPoint({ x: center.x, y: center.y })
-        editor.zoomToFit()
-    }
+        // Mapped Configuration (color, etc.)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const config = getNodeConfig(node.type)
 
-    // 3. Animate Nodes
-    for (const node of data.nodes) {
-        // Generate a fresh Tldraw ID
-        const shapeId = createShapeId();
-        idMap.set(node.id, shapeId);
+        // Create Shape ID (deterministic or random)
+        // We use a custom ID to easily find it if needed, or let Tldraw generate one
+        // Here we generate a new one to avoid collisions with existing shapes
+        const shapeId = createShapeId()
 
-        const layoutPos = layout.nodes.get(node.id);
-        const x = node.x || layoutPos?.x || 0;
-        const y = node.y || layoutPos?.y || 0;
-        const dim = getNodeDimensions(node.type)
-
-        // Shape creation logic
-        let props: Record<string, unknown> = {
-            w: dim.w,
-            h: dim.h,
+        // Determine specific properties based on type
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let props: any = {
+            w: nodeWidth,
+            h: nodeHeight,
             text: node.label,
-            nodeType: node.type || 'action',
-        };
-
-        const shapeType = 'rich-node';
-
-        // CASE A: It's an Icon
-        if (node.type === 'icon' && node.iconName) {
-            props = { ...props, nodeType: 'icon', iconName: node.iconName };
+            nodeType: node.type, // Custom property for our RichNodeShape
         }
-        // CASE B: Architecture Nodes
-        else if (['server', 'database', 'person', 'mobile', 'payment', 'actor'].includes(node.type)) {
-            props = { ...props, nodeType: node.type === 'actor' ? 'person' : node.type };
+
+        // Special handling for icons
+        if (node.type === 'icon' && node.iconName) {
+            props = {
+                ...props,
+                iconName: node.iconName
+            }
         }
 
         editor.createShape({
             id: shapeId,
-            type: shapeType,
-            x: x,
-            y: y,
+            type: 'rich-node', // We use our custom shape 'rich-node'
+            x: position.x,
+            y: position.y,
             props: props,
-        });
+        })
+    })
 
-        // Delay for "Pop" effect
-        await new Promise(resolve => setTimeout(resolve, 100));
-    }
+    // 4. Create Edges (Arrows)
+    data.edges.forEach((edge) => {
+        // We need the exact positions of the created nodes.
+        // Since we just created them, we can rely on the layout calculation.
+        const fromNode = layout.nodes.get(edge.source)
+        const toNode = layout.nodes.get(edge.target)
 
-    // 4. Animate Edges (Bindings Mode - Real connections)
-    for (const edge of data.edges) {
-        // Retrieve Tldraw IDs for nodes
-        const sourceShapeId = idMap.get(edge.source)
-        const targetShapeId = idMap.get(edge.target)
+        if (!fromNode || !toNode) return
 
-        if (!sourceShapeId || !targetShapeId) {
-            console.warn(`[DiagramGenerator] Edge ignored: ${edge.source} -> ${edge.target} (IDs not found)`)
-            continue
-        }
+        // Calculate start and end points (centers of nodes)
+        const startX = fromNode.x + nodeWidth / 2
+        const startY = fromNode.y + nodeHeight / 2
+        const endX = toNode.x + nodeWidth / 2
+        const endY = toNode.y + nodeHeight / 2
 
-        const arrowId = createShapeId()
-
-        // A. The Arrow
-        // Note: text prop is deprecated/removed in favor of richText in recent versions,
-        // but checking props from Remote branch.
-        // Remote branch logic:
-        let arrowProps: any = {
-            start: { x: 0, y: 0 },
-            end: { x: 0, y: 0 },
-            arrowheadStart: 'none',
+        const arrowProps = {
+            start: { x: startX, y: startY },
+            end: { x: endX, y: endY },
+            text: edge.label || '',
             arrowheadEnd: 'arrow',
             font: 'draw',
         }
 
-        if (edge.label && typeof toRichText === 'function') {
-             arrowProps.richText = toRichText(edge.label)
-        }
-
         editor.createShape({
-            id: arrowId,
             type: 'arrow',
-            x: 0,
+            x: 0, // Arrows are often defined with relative points, but Tldraw 2.0+ uses absolute or relative depending on config.
+            // Actually, in Tldraw SDK, arrows are shapes with 'start' and 'end' handles.
+            // If we set x,y to 0, start/end are absolute coordinates.
             y: 0,
             props: arrowProps,
         })
+    })
 
-        // B. Bindings
-        // In recent tldraw versions, bindings are separate records
-        editor.createBindings([
-            {
-                fromId: arrowId,
-                toId: sourceShapeId,
-                type: 'arrow',
-                props: {
-                    terminal: 'start',
-                    normalizedAnchor: { x: 0.5, y: 0.5 },
-                    isExact: false,
-                    isPrecise: false,
-                },
-            },
-            {
-                fromId: arrowId,
-                toId: targetShapeId,
-                type: 'arrow',
-                props: {
-                    terminal: 'end',
-                    normalizedAnchor: { x: 0.5, y: 0.5 },
-                    isExact: false,
-                    isPrecise: false,
-                },
-            },
-        ])
+    // 5. Add Explanation (if present)
+    if (explanation) {
+        // Position: Bottom of the diagram
+        // We estimate the height of the diagram
+        // let maxY = 0
+        // layout.nodes.forEach(pos => {
+        //     if (pos.y > maxY) maxY = pos.y
+        // })
 
-        // Delay for "Live drawing" effect
-        await new Promise(resolve => setTimeout(resolve, 100))
+        // Create a text shape or a "sticky note"
+        // editor.createShape({
+        //     type: 'note',
+        //     x: 0,
+        //     y: maxY + 150,
+        //     props: {
+        //         text: `📝 Résumé IA :\n${explanation}`,
+        //         color: 'yellow',
+        //     },
+        // })
     }
 
-    // 5. Add explanation (if present)
-    if (explanation && explanation.trim().length > 0) {
-        const textX = (layout.width || 0) + 50;
-
-        editor.createShape({
-            id: createShapeId(),
-            type: 'rich-node',
-            x: textX,
-            y: 0,
-            props: {
-                w: 400,
-                h: 200,
-                text: explanation,
-                nodeType: 'explanation',
-            },
-        });
-    }
-
-    // 5. Final: Perfect Framing
+    // 6. Zoom to Fit
     editor.zoomToFit()
 }

@@ -2,35 +2,6 @@
 
 import { createShapeId, Editor } from '@tldraw/tldraw'
 
-<<<<<<< HEAD
-/**
- * Props for the TestButton component.
- */
-interface TestButtonProps {
-    /** The Tldraw editor instance. */
-    editor: Editor
-}
-
-/**
- * TestButton Component.
- * A simple button to add a test shape to the canvas.
- * Used for verifying basic canvas interaction and shape creation.
- *
- * @param props - The props for the component.
- * @returns The rendered TestButton component.
- */
-export default function TestButton({ editor }: TestButtonProps) {
-    /**
-     * Handles adding a test rectangle shape to the center of the viewport.
-     */
-    const handleAddShape = () => {
-        if (!editor) return
-
-        // Create a unique ID for the shape
-        const shapeId = createShapeId()
-
-        // Get viewport center
-=======
 interface TestButtonProps {
     editor: Editor
 }
@@ -43,18 +14,12 @@ export default function TestButton({ editor }: TestButtonProps) {
         const shapeId = createShapeId()
 
         // Obtenir le centre du viewport
->>>>>>> origin/enhance-diagram-visuals-bindings
         const { x, y, w, h } = editor.getViewportPageBounds()
         const centerX = x + w / 2
         const centerY = y + h / 2
 
-<<<<<<< HEAD
-        // Add a blue rectangle at the center
-        // Note: Text editing will be handled via user interaction or other logic
-=======
         // Ajouter un rectangle bleu au centre
         // Note: Le texte sera ajouté dans la Phase 2 via une shape séparée ou l'utilisateur peut double-cliquer pour éditer
->>>>>>> origin/enhance-diagram-visuals-bindings
         editor.createShape({
             id: shapeId,
             type: 'geo',
@@ -69,11 +34,7 @@ export default function TestButton({ editor }: TestButtonProps) {
             },
         })
 
-<<<<<<< HEAD
-        // Select the shape and zoom to it
-=======
         // Sélectionner la forme et zoomer dessus
->>>>>>> origin/enhance-diagram-visuals-bindings
         editor.select(shapeId)
         editor.zoomToSelection()
     }
