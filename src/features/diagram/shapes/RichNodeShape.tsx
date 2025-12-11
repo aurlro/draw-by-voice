@@ -31,10 +31,17 @@ import {
     Zap
 } from 'lucide-react'
 
+<<<<<<< HEAD
 // Definition of supported node types for icons
 type NodeType = 'action' | 'decision' | 'input' | 'process' | 'database' | 'start' | 'end' | 'person' | 'system' | 'step'
 
 // Mapping of types to Lucide icons
+=======
+// Définition des types de nœuds supportés pour les icônes
+type NodeType = 'action' | 'decision' | 'input' | 'process' | 'database' | 'start' | 'end' | 'person' | 'system' | 'step'
+
+// Mapping des types vers les icônes Lucide
+>>>>>>> origin/enhance-diagram-visuals-bindings
 const ICON_MAP: Record<string, React.ElementType> = {
     action: Zap,
     decision: CircleHelp,
@@ -52,10 +59,17 @@ const ICON_MAP: Record<string, React.ElementType> = {
     default: Layout
 }
 
+<<<<<<< HEAD
 // Vertical layout for entities (e.g., System Architecture)
 const ENTITY_Vertical_TYPES = ['server', 'mobile', 'database', 'person', 'payment']
 
 // Custom pastel colors
+=======
+// Layout vertical pour les entités (ex: Architecture Systeme)
+const ENTITY_Vertical_TYPES = ['server', 'mobile', 'database', 'person', 'payment']
+
+// Couleurs pastel personnalisées
+>>>>>>> origin/enhance-diagram-visuals-bindings
 const PASTEL_COLORS = {
     action: 'bg-orange-100 border-orange-200 text-orange-800',
     decision: 'bg-indigo-100 border-indigo-200 text-indigo-800',
@@ -65,9 +79,12 @@ const PASTEL_COLORS = {
     default: 'bg-white border-neutral-200 text-neutral-800'
 }
 
+<<<<<<< HEAD
 /**
  * Interface defining the custom 'rich-node' shape type.
  */
+=======
+>>>>>>> origin/enhance-diagram-visuals-bindings
 type RichNodeShape = TLBaseShape<
     'rich-node',
     {
@@ -79,12 +96,16 @@ type RichNodeShape = TLBaseShape<
     }
 >
 
+<<<<<<< HEAD
 /**
  * SafeIcon Component.
  * Handles image loading errors by falling back to a text-based placeholder.
  *
  * @param props - props containing url, alt text, and fallback text.
  */
+=======
+// Composant SafeIcon pour gérer les erreurs de chargement d'image
+>>>>>>> origin/enhance-diagram-visuals-bindings
 const SafeIcon = ({ url, alt, fallbackText }: { url: string, alt: string, fallbackText: string }) => {
     const [error, setError] = React.useState(false);
 
@@ -106,10 +127,13 @@ const SafeIcon = ({ url, alt, fallbackText }: { url: string, alt: string, fallba
     )
 }
 
+<<<<<<< HEAD
 /**
  * RichNodeShapeUtil Class.
  * Defines the behavior and rendering logic for the custom 'rich-node' shape in Tldraw.
  */
+=======
+>>>>>>> origin/enhance-diagram-visuals-bindings
 export class RichNodeShapeUtil extends BaseBoxShapeUtil<RichNodeShape> {
     static override type = 'rich-node' as const
     static override props: RecordProps<RichNodeShape> = {
@@ -140,7 +164,11 @@ export class RichNodeShapeUtil extends BaseBoxShapeUtil<RichNodeShape> {
     override component(shape: RichNodeShape) {
         const { w, h, text, nodeType, iconName } = shape.props
 
+<<<<<<< HEAD
         // SPECIAL CASE: Explanation (Text only)
+=======
+        // CAS SPECIAL: Explication (Texte seul)
+>>>>>>> origin/enhance-diagram-visuals-bindings
         if (nodeType === 'explanation') {
             return (
                 <HTMLContainer id={shape.id} style={{ pointerEvents: 'all' }}>
@@ -151,9 +179,15 @@ export class RichNodeShapeUtil extends BaseBoxShapeUtil<RichNodeShape> {
             )
         }
 
+<<<<<<< HEAD
         // SPECIAL CASE: External Icon (Iconify or SimpleIcons)
         if (nodeType === 'icon' && iconName) {
             // Support for Iconify (format "collection:name") or SimpleIcons (slug)
+=======
+        // CAS SPECIAL: Icone externe (Iconify ou SimpleIcons)
+        if (nodeType === 'icon' && iconName) {
+            // Support pour Iconify (format "collection:name") ou SimpleIcons (slug)
+>>>>>>> origin/enhance-diagram-visuals-bindings
             let iconUrl = '';
             if (iconName.includes(':')) {
                 // Iconify API (SVG)
@@ -175,7 +209,11 @@ export class RichNodeShapeUtil extends BaseBoxShapeUtil<RichNodeShape> {
         const Icon = ICON_MAP[nodeType] || ICON_MAP.default
         const colorClass = PASTEL_COLORS[nodeType as keyof typeof PASTEL_COLORS] || PASTEL_COLORS.default
 
+<<<<<<< HEAD
         // CASE: Vertical Layout (Entity Column) - Icon above text
+=======
+        // CAS: Layout Vertical (Entity Column) - Icone au dessus du texte
+>>>>>>> origin/enhance-diagram-visuals-bindings
         if (ENTITY_Vertical_TYPES.includes(nodeType)) {
             return (
                 <HTMLContainer id={shape.id} style={{ pointerEvents: 'all' }}>
@@ -195,7 +233,11 @@ export class RichNodeShapeUtil extends BaseBoxShapeUtil<RichNodeShape> {
             )
         }
 
+<<<<<<< HEAD
         // DEFAULT CASE: Card Layout (Icon left)
+=======
+        // CAS DEFAULT: Card Layout (Icone à gauche)
+>>>>>>> origin/enhance-diagram-visuals-bindings
         return (
             <HTMLContainer
                 id={shape.id}

@@ -85,6 +85,22 @@ export const MOCK_DIAGRAMS: Record<string, DiagramData> = {
     'Login Flow': MOCK_LOGIN_FLOW,
     'API Architecture': MOCK_API_ARCHITECTURE,
     'CI/CD Pipeline': MOCK_CICD_PIPELINE,
+    'Rich Tech Stack': {
+        nodes: [
+            { id: 'dev', label: 'Developer', type: 'actor', x: 0, y: 0 },
+            { id: 'github', label: 'GitHub', type: 'icon', iconName: 'github', x: 0, y: 0 },
+            { id: 'vercel', label: 'Vercel', type: 'icon', iconName: 'vercel', x: 0, y: 0 },
+            { id: 'next', label: 'Next.js', type: 'icon', iconName: 'nextdotjs', x: 0, y: 0 },
+            { id: 'supabase', label: 'Supabase', type: 'icon', iconName: 'supabase', x: 0, y: 0 },
+        ],
+        edges: [
+            { source: 'dev', target: 'github', label: 'Push' },
+            { source: 'github', target: 'vercel', label: 'Trigger Build' },
+            { source: 'vercel', target: 'next', label: 'Deploy' },
+            { source: 'next', target: 'supabase', label: 'Query' },
+        ],
+        explanation: 'A modern stack with specific icons: GitHub, Vercel, Next.js and Supabase.'
+    },
     'Online Purchase Cycle': {
         nodes: [
             { id: 'customer', label: 'Customer', type: 'user', x: 0, y: 0 },

@@ -1,16 +1,26 @@
 /**
+<<<<<<< HEAD
  * Shared types used across both the Client and Server.
  * Centralized to avoid duplication and ensure consistency throughout the application.
+=======
+ * Types partagés entre Client et Server
+ * Centralisés pour éviter la duplication et garantir la cohérence
+>>>>>>> origin/enhance-diagram-visuals-bindings
  */
 
 import type { DiagramData, DiagramNode, DiagramEdge, NodeType } from '../lib/validation/schemas'
 
 /**
+<<<<<<< HEAD
  * Re-export types from Zod schemas for easy access.
+=======
+ * Re-export des types depuis les schémas Zod
+>>>>>>> origin/enhance-diagram-visuals-bindings
  */
 export type { DiagramData, DiagramNode, DiagramEdge, NodeType }
 
 /**
+<<<<<<< HEAD
  * Interface representing the state of the Realtime connection (legacy).
  */
 export interface RealtimeState {
@@ -19,10 +29,18 @@ export interface RealtimeState {
     /** Indicates if audio recording is currently active. */
     isRecording: boolean
     /** Contains error message if an error occurred, otherwise null. */
+=======
+ * Interface pour l'état de connexion Realtime (legacy)
+ */
+export interface RealtimeState {
+    isConnected: boolean
+    isRecording: boolean
+>>>>>>> origin/enhance-diagram-visuals-bindings
     error: string | null
 }
 
 /**
+<<<<<<< HEAD
  * Props for the useOpenAIRealtime hook (legacy).
  */
 export interface UseOpenAIRealtimeProps {
@@ -36,10 +54,17 @@ export interface UseOpenAIRealtimeProps {
      * Callback function triggered when an error occurs.
      * @param error - The error message.
      */
+=======
+ * Props pour le hook useOpenAIRealtime (legacy)
+ */
+export interface UseOpenAIRealtimeProps {
+    onFunctionCall?: (functionName: string, args: Record<string, unknown>) => void
+>>>>>>> origin/enhance-diagram-visuals-bindings
     onError?: (error: string) => void
 }
 
 /**
+<<<<<<< HEAD
  * Interface for the audio recorder reference.
  * Holds references to Web Audio API objects.
  */
@@ -51,10 +76,19 @@ export interface AudioRecorderRef {
     /** The AudioWorkletNode that processes audio data. */
     processor: AudioWorkletNode | ScriptProcessorNode
     /** The MediaStreamAudioSourceNode that acts as the audio source. */
+=======
+ * Interface pour le contexte audio
+ */
+export interface AudioRecorderRef {
+    stream: MediaStream
+    audioContext: AudioContext
+    processor: AudioWorkletNode
+>>>>>>> origin/enhance-diagram-visuals-bindings
     source: MediaStreamAudioSourceNode
 }
 
 /**
+<<<<<<< HEAD
  * Type for the response from the ephemeral session API.
  */
 export interface EphemeralSessionResponse {
@@ -66,5 +100,14 @@ export interface EphemeralSessionResponse {
         expires_at: number
     }
     /** The expiration timestamp of the session. */
+=======
+ * Type pour la réponse de la session ephemeral
+ */
+export interface EphemeralSessionResponse {
+    client_secret: {
+        value: string
+        expires_at: number
+    }
+>>>>>>> origin/enhance-diagram-visuals-bindings
     expires_at: number
 }

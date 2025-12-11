@@ -62,11 +62,13 @@ export const NODE_TYPE_CONFIG: Record<NodeType, NodeTypeConfig> = {
     mobile: {
         color: 'grey',
         geo: 'rectangle',
+        iconUrl: 'https://cdn.simpleicons.org/android',
         labelColor: 'black'
     },
     payment: {
-        color: 'orange',
+        color: 'yellow',
         geo: 'rectangle',
+        iconUrl: 'https://cdn.simpleicons.org/stripe',
         labelColor: 'black'
     },
     // Legacy abstract types (mapped to geo shapes)

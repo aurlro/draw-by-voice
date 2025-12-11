@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+<<<<<<< HEAD
 /**
  * Zod schema for environment variables validation.
  * Ensures that necessary environment variables are present and correctly typed.
@@ -15,4 +16,11 @@ const envSchema = z.object({
  * Validated environment variables object.
  * Throws an error if validation fails.
  */
+=======
+const envSchema = z.object({
+    OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required'),
+    NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+})
+
+>>>>>>> origin/enhance-diagram-visuals-bindings
 export const env = envSchema.parse(process.env)

@@ -63,8 +63,7 @@ export default function VoiceControl({ editor, onDiagramGenerated }: VoiceContro
         }
     }, [isListening, startVoiceSession, stopVoiceSession])
 
-    // Removed unused helper functions for button styles and text as they are now handled in RealtimeStatusPanel or not needed.
-    // getButtonClass, getButtonIcon, getButtonText were identified as unused variables by linter.
+    // Removed unused helper functions for button styles and text as they are now handled in RealtimeStatusPanel.
 
     return (
         <RealtimeStatusPanel
